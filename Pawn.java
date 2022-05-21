@@ -1,8 +1,8 @@
 import java.util.ArrayList;
 
 public class Pawn extends Piece {
-    public Pawn(String c) {
-        super("PAWN", c);
+    public Pawn(ColorEnum c) {
+        super(PieceEnum.PAWN, c);
     }
 
     public ArrayList<Position> possibleMovements(Position pos) {

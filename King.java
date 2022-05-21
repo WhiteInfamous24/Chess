@@ -1,8 +1,8 @@
 import java.util.ArrayList;
 
 public class King extends Piece {
-    public King(String c) {
-        super("KING", c);
+    public King(ColorEnum c) {
+        super(PieceEnum.KING, c);
     }
 
     public ArrayList<Position> possibleMovements(Position pos) {

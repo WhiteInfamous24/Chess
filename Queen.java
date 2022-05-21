@@ -1,8 +1,8 @@
 import java.util.ArrayList;
 
 public class Queen extends Piece {
-    public Queen(String c) {
-        super("QUEEN", c);
+    public Queen(ColorEnum c) {
+        super(PieceEnum.QUEEN, c);
     }
 
     public ArrayList<Position> possibleMovements(Position pos) {

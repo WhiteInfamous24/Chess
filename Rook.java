@@ -1,8 +1,8 @@
 import java.util.ArrayList;
 
 public class Rook extends Piece {
-    public Rook(String c) {
-        super("ROOK", c);
+    public Rook(ColorEnum c) {
+        super(PieceEnum.ROOK, c);
     }
 
     public ArrayList<Position> possibleMovements(Position pos) {

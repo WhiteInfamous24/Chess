@@ -1,8 +1,8 @@
 import java.util.ArrayList;
 
 public class Bishop extends Piece {
-    public Bishop(String c) {
-        super("BISHOP", c);
+    public Bishop(ColorEnum c) {
+        super(PieceEnum.BISHOP, c);
     }
 
     public ArrayList<Position> possibleMovements(Position pos) {

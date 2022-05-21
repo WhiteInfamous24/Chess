@@ -1,8 +1,8 @@
 import java.util.ArrayList;
 
 public class Knight extends Piece {
-    public Knight(String c) {
-        super("KNIGHT", c);
+    public Knight(ColorEnum c) {
+        super(PieceEnum.KNIGHT, c);
     }
 
     public ArrayList<Position> possibleMovements(Position pos) {
