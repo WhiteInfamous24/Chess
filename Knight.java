@@ -1,19 +1,38 @@
 import java.util.ArrayList;
 
-public class Knight implements Piece {
-    private final static String name = "KNIGHT";
-    
-    public Knight() {
-        
+public class Knight extends Piece {
+    public Knight(String c) {
+        super("KNIGHT", c);
     }
 
-    public ArrayList<Position> possibleMovements(Position position) {
+    public ArrayList<Position> possibleMovements(Position pos) {
         ArrayList<Position> output = new ArrayList<Position>();
-        output.add();
+        int x = pos.getX();
+        int y = pos.getY();
+        if(y+1 <= 7) {
+            if(x+2 <= 7)
+                output.add(new Position(x+2, y+1));
+            if(x-2 >= 0)
+                output.add(new Position(x-2, y+1));
+        }
+        if(y-1 >= 0) {
+            if(x+2 <= 7)
+                output.add(new Position(x+2, y-1));
+            if(x-2 >= 0)
+                output.add(new Position(x-2, y-1));
+        }
+        if(y+2 <= 7) {
+            if(x+1 <= 7)
+                output.add(new Position(x+1, y+2));
+            if(x-1 >= 0)
+                output.add(new Position(x-1, y+2));
+        }
+        if(y-2 >= 0) {
+            if(x+1 <= 7)
+                output.add(new Position(x+1, y-2));
+            if(x-1 >= 0)
+                output.add(new Position(x-1, y-2));
+        }
         return output;
-    }
-
-    public String getNameOfPiece() {
-        return name;
     }
 }

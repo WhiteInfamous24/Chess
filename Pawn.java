@@ -1,19 +1,16 @@
 import java.util.ArrayList;
 
-public class Pawn implements Piece {
-    private final static String name = "PAWN";
-    
-    public Pawn() {
-        
+public class Pawn extends Piece {
+    public Pawn(String c) {
+        super("PAWN", c);
     }
 
-    public ArrayList<Position> possibleMovements(Position position) {
+    public ArrayList<Position> possibleMovements(Position pos) {
         ArrayList<Position> output = new ArrayList<Position>();
-        output.add(new Position(position.getX(), position.getY()+1));
+        int x = pos.getX();
+        int y = pos.getY();
+        if(y+1 <= 7)
+            output.add(new Position(x, y+1));
         return output;
-    }
-
-    public String getNameOfPiece() {
-        return name;
     }
 }

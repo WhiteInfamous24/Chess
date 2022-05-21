@@ -1,19 +1,34 @@
 import java.util.ArrayList;
 
-public class Queen implements Piece {
-    private final static String name = "QUEEN";
-    
-    public Queen() {
-        
+public class Queen extends Piece {
+    public Queen(String c) {
+        super("QUEEN", c);
     }
 
-    public ArrayList<Position> possibleMovements(Position position) {
+    public ArrayList<Position> possibleMovements(Position pos) {
         ArrayList<Position> output = new ArrayList<Position>();
-        output.add();
+        int x = pos.getX();
+        int y = pos.getY();
+        for(int i = 1; i < 7; i++) {
+            if(y+i <= 7) {
+                output.add(new Position(x, y+i));
+                if(x+i <= 7)
+                    output.add(new Position(x+i, y+i));
+                if(x-i >= 0)
+                    output.add(new Position(x-i, y+i));
+            }
+            if(y-i >= 0) {
+                output.add(new Position(x, y-i));
+                if(x+i <= 7)
+                    output.add(new Position(x+i, y-i));
+                if(x-i >= 0)
+                    output.add(new Position(x-i, y-i));
+            }
+            if(x+i <= 7)
+                output.add(new Position(x+i, y));
+            if(x-i >= 0)
+                output.add(new Position(x-i, y));
+        }
         return output;
-    }
-
-    public String getNameOfPiece() {
-        return name;
     }
 }

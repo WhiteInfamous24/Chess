@@ -1,6 +1,17 @@
 import java.util.ArrayList;
 
-public interface Piece {
-    public ArrayList<Position> possibleMovements(Position position);
-    public String getNameOfPiece();
+public abstract class Piece {
+    public static String name;
+    public static String color;
+
+    public Piece(String n, String c) {
+        name = n;
+        color = c;
+    }
+
+    public abstract ArrayList<Position> possibleMovements(Position pos);
+
+    public final String getNameOfPiece() {
+        return name;
+    }
 }

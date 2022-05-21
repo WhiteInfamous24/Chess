@@ -7,16 +7,16 @@ public class Board {
                 board[i][j] = null;
     }
 
-    public void setPiece(Piece piece, Position position) {
-        board[position.getX()][position.getY()] = piece;
+    public void setPiece(Piece p, Position pos) {
+        board[pos.getX()][pos.getY()] = p;
     }
 
-    public Piece getPiece(Position position) {
-        return board[position.getX()][position.getY()];
+    public Piece getPiece(Position pos) {
+        return board[pos.getX()][pos.getY()];
     }
 
-    public void movePiece(Position position_1, Position position_2) {
-        board[position_2.getX()][position_2.getY()] = board[position_1.getX()][position_1.getY()];
-        board[position_1.getX()][position_1.getY()] = null;
+    public void movePiece(Position pos_1, Position pos_2) {
+        board[pos_2.getX()][pos_2.getY()] = board[pos_1.getX()][pos_1.getY()];
+        board[pos_1.getX()][pos_1.getY()] = null;
     }
 }
