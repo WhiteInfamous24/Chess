@@ -1,8 +1,8 @@
 import java.util.ArrayList;
 
 public abstract class Piece {
-    public static PieceEnum name;
-    public static ColorEnum color;
+    public PieceEnum name;
+    public ColorEnum color;
 
     public Piece(PieceEnum n, ColorEnum c) {
         name = n;
