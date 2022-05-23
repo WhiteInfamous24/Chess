@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 public class Bishop extends Piece {
     public Bishop(ColorEnum c) {
-        super(PieceEnum.BISHOP, c, false);
+        super(PieceEnum.BISHOP, c, true);
     }
 
     public ArrayList<Position> possibleMovements(Position pos) {

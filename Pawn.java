@@ -13,6 +13,10 @@ public class Pawn extends Piece {
             output.add(new Position(x, y+1));
         if(y-1 >= 0 && color == ColorEnum.WHITE)
             output.add(new Position(x, y-1));
+        if(y+2 <= 7 && color == ColorEnum.BLACK && !was_moved)
+            output.add(new Position(x, y+2));
+        if(y-2 >= 0 && color == ColorEnum.WHITE && !was_moved)
+            output.add(new Position(x, y-2));
         return output;
     }
 }

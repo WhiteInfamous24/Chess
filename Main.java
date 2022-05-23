@@ -6,8 +6,11 @@ public class Main {
         //game.showBoard();
         game.initializePieces();
         game.showBoard();
-        game.movePiece();
-        game.showBoard();
+        while(true) {
+            game.movePiece();
+            game.showBoard();
+            game.changePlayer();
+        }
     }
 
     public static void pause() {
