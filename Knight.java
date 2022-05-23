@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 public class Knight extends Piece {
     public Knight(ColorEnum c) {
-        super(PieceEnum.KNIGHT, c);
+        super(PieceEnum.KNIGHT, c, true);
     }
 
     public ArrayList<Position> possibleMovements(Position pos) {

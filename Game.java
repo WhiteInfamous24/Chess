@@ -1,8 +1,13 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
 public class Game {
     private Board board;
+    private ColorEnum player;
 
     public Game() {
         board = new Board();
+        player = ColorEnum.WHITE;
     }
 
     public void initializePieces() {
@@ -26,6 +31,53 @@ public class Game {
         board.setPiece(new King(ColorEnum.WHITE), new Position(4, 7));
         board.setPiece(new Queen(ColorEnum.WHITE), new Position(3, 7));
         board.setPiece(new King(ColorEnum.BLACK), new Position(3, 0));
+    }
+
+    public void changePlayer() {
+        if(player == ColorEnum.WHITE)
+            player = ColorEnum.BLACK;
+        else
+            player = ColorEnum.WHITE;
+    }
+
+    public void movePiece() {
+        Position position_1;
+        Position position_2;
+        do {
+            System.out.print("Seleccionar pieza a mover [fila][columna]: ");
+            position_1 = requestPosition();
+        } while(board.getPiece(position_1).getColorOfPiece() != player);
+        do {
+            System.out.print("Seleccionar casilla a mover [fila][columna]: ");
+            position_2 = requestPosition();
+        } while(board.getPiece(position_2) != null || !searchPositionInArray(board.getPiece(position_1).possibleMovements(position_1), position_2) || analizeIfJump(position_1, position_2) != board.getPiece(position_1).getCanJump());
+        board.movePiece(position_1, position_2);
+    }
+
+    private Position requestPosition() {
+        Scanner scanner = new Scanner(System.in);
+        String input = " ";
+        do
+            input = scanner.nextLine();
+        while(input.length() != 2 && input.charAt(0) < 97 && input.charAt(0) > 104 && input.charAt(1) < 48 && input.charAt(1) > 56);
+        //scanner.close();
+        return new Position(input.charAt(1)-49, input.charAt(0)-97);
+    }
+
+    private boolean searchPositionInArray(ArrayList<Position> array_pos, Position pos) {
+        boolean output = false;
+        for(Position position : array_pos)
+            if(position.getX() == pos.getX() && position.getY() == pos.getY())
+                output = true;
+        return output;
+    }
+
+    private boolean analizeIfJump(Position pos_1, Position pos_2) {
+        boolean output = false;
+
+        //implement
+
+        return output;
     }
 
     public void showBoard() {

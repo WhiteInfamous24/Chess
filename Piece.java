@@ -1,12 +1,14 @@
 import java.util.ArrayList;
 
 public abstract class Piece {
-    public PieceEnum name;
-    public ColorEnum color;
+    protected PieceEnum name;
+    protected ColorEnum color;
+    protected boolean can_jump;
 
-    public Piece(PieceEnum n, ColorEnum c) {
+    public Piece(PieceEnum n, ColorEnum c, boolean c_j) {
         name = n;
         color = c;
+        can_jump = c_j;
     }
 
     public abstract ArrayList<Position> possibleMovements(Position pos);
@@ -17,5 +19,9 @@ public abstract class Piece {
 
     public final ColorEnum getColorOfPiece() {
         return color;
+    }
+
+    public final boolean getCanJump() {
+        return can_jump;
     }
 }

@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 public class Rook extends Piece {
     public Rook(ColorEnum c) {
-        super(PieceEnum.ROOK, c);
+        super(PieceEnum.ROOK, c, false);
     }
 
     public ArrayList<Position> possibleMovements(Position pos) {

@@ -3,9 +3,10 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) throws Exception {
         Game game = new Game();
-        game.showBoard();
-        pause();
+        //game.showBoard();
         game.initializePieces();
+        game.showBoard();
+        game.movePiece();
         game.showBoard();
     }
 
