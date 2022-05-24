@@ -28,9 +28,9 @@ public class Pawn extends Piece {
             output.add(new Position(x+1, y+1));
         if(y-1 >= 0 && x+1 <= 7 && color == ColorEnum.WHITE)
             output.add(new Position(x+1, y-1));
-        if(y+1 <= 7 && x-1 >= 7 && color == ColorEnum.BLACK)
+        if(y+1 <= 7 && x-1 >= 0 && color == ColorEnum.BLACK)
             output.add(new Position(x-1, y+1));
-        if(y-1 >= 0 && x-1 >= 7 && color == ColorEnum.WHITE)
+        if(y-1 >= 0 && x-1 >= 0 && color == ColorEnum.WHITE)
             output.add(new Position(x-1, y-1));
         return output;
     }

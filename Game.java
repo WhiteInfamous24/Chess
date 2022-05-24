@@ -43,53 +43,56 @@ public class Game {
     public void movePiece() {
         Position position_1;
         Position position_2;
-        boolean valid_movement;
+        boolean valid_position;
         System.out.println("\nTURNO DE " + player + "\n");
         do {
-            System.out.print("Pieza a mover [fila][columna]: ");
+            System.out.print("Pieza a mover: ");
             position_1 = requestPosition();
             if(board.getPiece(position_1) != null)
-                valid_movement = board.getPiece(position_1).getColorOfPiece() == player;
+                valid_position = board.getPiece(position_1).getColorOfPiece() == player;
             else
-                valid_movement = false;
-            if(!valid_movement)
-                System.out.println("-POSICION NO VALIDA-");
-        } while(!valid_movement);
+                valid_position = false;
+            if(!valid_position)
+                System.out.println("POSICION NO VALIDA");
+        } while(!valid_position);
         do {
-            System.out.print("Mover a casilla [fila][columna]: ");
+            System.out.print("Mover a casilla: ");
             position_2 = requestPosition();
             if(board.getPiece(position_2) != null)
-                valid_movement = isValidMovement(position_1, position_2);
+                if(couldTakeAPiece(position_1, position_2))
+                    valid_position = isValidMovement(position_1, position_2);
+                else
+                    valid_position = false;
             else
-                valid_movement = isValidMovement(position_1, position_2);
-            if(!valid_movement)
-                System.out.println("-POSICION NO VALIDA-");
-        } while(!valid_movement);
+                valid_position = isValidMovement(position_1, position_2);
+            if(!valid_position)
+                System.out.println("POSICION NO VALIDA");
+        } while(!valid_position);
         board.movePiece(position_1, position_2);
     }
 
     private Position requestPosition() {
         Scanner scanner = new Scanner(System.in);
-        String input = " ";
-        input = scanner.nextLine();
+        String input = scanner.nextLine();
         //scanner.close();
         return new Position(input.charAt(1)-49, input.charAt(0)-97);
     }
 
-    /*
-    verifica que el movimiento sea a una casilla permitida dependiendo de los movimientos predefinidos de cada pieza
-    y luego verifica que, si la ficha realiza una trayectoria, no colisione con otras piezas en el trayecto
-    */
     private boolean isValidMovement(Position pos_1, Position pos_2) {
         ArrayList<Position> possible_movements = board.getPiece(pos_1).possibleMovements(pos_1);
-        if(searchPositionInArray(possible_movements, pos_2)) //veo si la posicion final se encuentra en una posicion valida de la pieza
+        ArrayList<Position> possible_takes = board.getPiece(pos_1).possibleTakes(pos_1);
+        if(searchPositionInArray(possible_takes, pos_2) && board.getPiece(pos_2) != null) //veo si la posicion final se encuentra en una posicion de toma valido de la pieza
             return analizeTrajectory(pos_1, pos_2);
-        else if(hasTakenAPiece(pos_1, pos_2))
+        else if(searchPositionInArray(possible_movements, pos_2)) //veo si la posicion final se encuentra en una posicion de movimiento valido de la pieza
             return analizeTrajectory(pos_1, pos_2);
         else
             return false;
     }
 
+    /*
+    verifica que, si la ficha realiza una trayectoria larga, no colisione con otras piezas en el trayecto,
+    a excepcion de la posicion final donde puede llegar a haber una pieza cualquiera
+    */
     private boolean analizeTrajectory(Position pos_1, Position pos_2) {
         if(board.getPiece(pos_1).getLongMovement()) { //veo si la pieza realiza movimientos de trayectoria
             boolean no_obstruction = true;
@@ -192,10 +195,14 @@ public class Game {
             return true;
     }
 
-    private boolean hasTakenAPiece(Position pos_1, Position pos_2) {
-        if(board.getPiece(pos_2).getColorOfPiece() != player)
-            if(searchPositionInArray(board.getPiece(pos_1).possibleTakes(pos_1), pos_2))
-                return true;
+    /*
+    verifica si hay una pieza en la posicion final, donde si es igual a la del jugador o es una casilla nula, no habra opcion de comer pieza,
+    y en caso de ser una pieza rival, se analizaran los movimientos definidos de cada pieza para comer
+    */
+    private boolean couldTakeAPiece(Position pos_1, Position pos_2) {
+        if(board.getPiece(pos_2) != null)
+            if(board.getPiece(pos_2).getColorOfPiece() != player)
+                return searchPositionInArray(board.getPiece(pos_1).possibleTakes(pos_1), pos_2);
         return false;
     }
 
