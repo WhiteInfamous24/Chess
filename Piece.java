@@ -14,6 +14,7 @@ public abstract class Piece {
     }
 
     public abstract ArrayList<Position> possibleMovements(Position pos);
+    public abstract ArrayList<Position> possibleTakes(Position pos);
 
     public final PieceEnum getNameOfPiece() {
         return name;
