@@ -245,6 +245,8 @@ public class Game {
     }
 
     public void showBoard() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
         int row = 8;
         System.out.println("");
         for(int i = 0; i < 8; i++) {
