@@ -16,21 +16,21 @@ public class Game {
             board.setPiece(new Pawn(ColorEnum.WHITE), new Position(i, 6));
         }
         board.setPiece(new Rook(ColorEnum.BLACK), new Position(0, 0));
-        board.setPiece(new Rook(ColorEnum.WHITE), new Position(0, 7));
         board.setPiece(new Rook(ColorEnum.BLACK), new Position(7, 0));
+        board.setPiece(new Rook(ColorEnum.WHITE), new Position(0, 7));
         board.setPiece(new Rook(ColorEnum.WHITE), new Position(7, 7));
         board.setPiece(new Knight(ColorEnum.BLACK), new Position(1, 0));
-        board.setPiece(new Knight(ColorEnum.WHITE), new Position(1, 7));
         board.setPiece(new Knight(ColorEnum.BLACK), new Position(6, 0));
+        board.setPiece(new Knight(ColorEnum.WHITE), new Position(1, 7));
         board.setPiece(new Knight(ColorEnum.WHITE), new Position(6, 7));
         board.setPiece(new Bishop(ColorEnum.BLACK), new Position(2, 0));
-        board.setPiece(new Bishop(ColorEnum.WHITE), new Position(2, 7));
         board.setPiece(new Bishop(ColorEnum.BLACK), new Position(5, 0));
+        board.setPiece(new Bishop(ColorEnum.WHITE), new Position(2, 7));
         board.setPiece(new Bishop(ColorEnum.WHITE), new Position(5, 7));
         board.setPiece(new Queen(ColorEnum.BLACK), new Position(4, 0));
-        board.setPiece(new King(ColorEnum.WHITE), new Position(4, 7));
         board.setPiece(new Queen(ColorEnum.WHITE), new Position(3, 7));
         board.setPiece(new King(ColorEnum.BLACK), new Position(3, 0));
+        board.setPiece(new King(ColorEnum.WHITE), new Position(4, 7));
     }
 
     public void changePlayer() {
@@ -40,7 +40,7 @@ public class Game {
             player = ColorEnum.WHITE;
     }
 
-    public void movePiece() {
+    public void movePiece() throws IndexOutOfBoundsException {
         Position position_1;
         Position position_2;
         boolean valid_position;
@@ -48,23 +48,33 @@ public class Game {
         do {
             System.out.print("Pieza a mover: ");
             position_1 = requestPosition();
-            if(board.getPiece(position_1) != null)
-                valid_position = board.getPiece(position_1).getColorOfPiece() == player;
-            else
+            try {
+                if(board.getPiece(position_1) != null)
+                    valid_position = board.getPiece(position_1).getColorOfPiece() == player;
+                else
+                    valid_position = false;
+            } catch (IndexOutOfBoundsException e) {
+                System.out.println("-IndexOutOfBoundsException-");
                 valid_position = false;
+            }
             if(!valid_position)
                 System.out.println("POSICION NO VALIDA");
         } while(!valid_position);
         do {
             System.out.print("Mover a casilla: ");
             position_2 = requestPosition();
-            if(board.getPiece(position_2) != null)
-                if(couldTakeAPiece(position_1, position_2))
-                    valid_position = isValidMovement(position_1, position_2);
+            try {
+                if(board.getPiece(position_2) != null)
+                    if(couldTakeAPiece(position_1, position_2))
+                        valid_position = isValidMovement(position_1, position_2);
+                    else
+                        valid_position = false;
                 else
-                    valid_position = false;
-            else
-                valid_position = isValidMovement(position_1, position_2);
+                    valid_position = isValidMovement(position_1, position_2);
+            } catch (IndexOutOfBoundsException e) {
+                System.out.println("-IndexOutOfBoundsException-");
+                valid_position = false;
+            }
             if(!valid_position)
                 System.out.println("POSICION NO VALIDA");
         } while(!valid_position);
@@ -196,8 +206,8 @@ public class Game {
     }
 
     /*
-    verifica si hay una pieza en la posicion final, donde si es igual a la del jugador o es una casilla nula, no habra opcion de comer pieza,
-    y en caso de ser una pieza rival, se analizaran los movimientos definidos de cada pieza para comer
+    verifica si hay una pieza en la posicion final, donde si esta es igual a la del jugador o es una casilla nula, no habra opcion de comer pieza,
+    y en caso de ser una pieza rival, se analizaran los movimientos predefinidos de cada pieza para ver si puede comer
     */
     private boolean couldTakeAPiece(Position pos_1, Position pos_2) {
         if(board.getPiece(pos_2) != null)
