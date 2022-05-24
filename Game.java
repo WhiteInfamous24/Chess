@@ -85,7 +85,7 @@ public class Game {
         Scanner scanner = new Scanner(System.in);
         String input = scanner.nextLine();
         //scanner.close();
-        return new Position(input.charAt(1)-49, input.charAt(0)-97);
+        return new Position(input.charAt(0)-97, 7-(input.charAt(1)-49));
     }
 
     private boolean isValidMovement(Position pos_1, Position pos_2) {
@@ -216,6 +216,17 @@ public class Game {
         return false;
     }
 
+    /*
+    ni el rey ni la torre deben haber sido movidas,
+    el rey no puede estar en jaque,
+    ninguna casilla de la trayectoria que recorrera el rey puede estar atacada,
+    no deben haber piezas en entre el rey y la torre,
+    el enrroque es moviendo el rey 2 casillas hacia la derecha o izquierda, y la torre, del lado al que se movio, salta sobre el rey
+    */
+    private boolean couldMakeCastling() {
+        return true;
+    }
+
     private boolean searchPositionInArray(ArrayList<Position> array_pos, Position pos) {
         boolean output = false;
         for(Position position : array_pos)
@@ -225,12 +236,12 @@ public class Game {
     }
 
     public void showBoard() {
-        char row = 'A';
+        int row = 8;
         System.out.println("");
         for(int i = 0; i < 8; i++) {
             if(i == 0) {
                 System.out.println("||===||===============================================================================================||===||");
-                System.out.println("||   ||     1     |     2     |     3     |     4     |     5     |     6     |     7     |     8     ||   ||");
+                System.out.println("||   ||     A     |     B     |     C     |     D     |     E     |     F     |     G     |     H     ||   ||");
                 System.out.println("||===||===============================================================================================||===||");
             }
             else
@@ -254,10 +265,10 @@ public class Game {
             }
             System.out.println("|| " + row + " ||");
             System.out.println("||   ||           |           |           |           |           |           |           |           ||   ||");
-            row++;
+            row--;
         }
         System.out.println("||===||===============================================================================================||===||");
-        System.out.println("||   ||     1     |     2     |     3     |     4     |     5     |     6     |     7     |     8     ||   ||");
+        System.out.println("||   ||     A     |     B     |     C     |     D     |     E     |     F     |     G     |     H     ||   ||");
         System.out.println("||===||===============================================================================================||===||");
     }
 }
