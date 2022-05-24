@@ -1,3 +1,5 @@
+package srs;
+
 import java.util.Scanner;
 
 public class Main {

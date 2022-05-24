@@ -1,5 +1,14 @@
+package srs;
+
 import java.util.ArrayList;
 import java.util.Scanner;
+import srs.enums.ColorEnum;
+import srs.pieces.Bishop;
+import srs.pieces.King;
+import srs.pieces.Knight;
+import srs.pieces.Pawn;
+import srs.pieces.Queen;
+import srs.pieces.Rook;
 
 public class Game {
     private Board board;

@@ -1,4 +1,10 @@
+package srs.pieces;
+
 import java.util.ArrayList;
+import srs.Piece;
+import srs.Position;
+import srs.enums.ColorEnum;
+import srs.enums.PieceEnum;
 
 public class Knight extends Piece {
     public Knight(ColorEnum c) {

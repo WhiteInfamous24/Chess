@@ -1,4 +1,8 @@
+package srs;
+
 import java.util.ArrayList;
+import srs.enums.ColorEnum;
+import srs.enums.PieceEnum;
 
 public abstract class Piece {
     protected PieceEnum name;
