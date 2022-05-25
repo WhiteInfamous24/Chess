@@ -11,7 +11,7 @@ public class Main {
         while(true) {
             game.movePiece();
             game.showBoard();
-            game.changePlayer();
+            //game.changePlayer();
         }
     }
 

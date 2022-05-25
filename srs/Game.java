@@ -3,6 +3,7 @@ package srs;
 import java.util.ArrayList;
 import java.util.Scanner;
 import srs.enums.ColorEnum;
+import srs.enums.PieceEnum;
 import srs.pieces.Bishop;
 import srs.pieces.King;
 import srs.pieces.Knight;
@@ -74,7 +75,33 @@ public class Game {
             position_2 = requestPosition();
             try {
                 if(board.getPiece(position_2) != null)
-                    if(couldTakeAPiece(position_1, position_2))
+                    if(couldMakeCastling(position_1, position_2)) {
+                        if(board.getPiece(position_1).getNameOfPiece().equals(PieceEnum.ROOK)) {
+                            Position aux = position_1;
+                            position_1 = position_2;
+                            position_2 = aux;
+                        }
+                        if(position_2.getX() == 0)
+                            if(player == ColorEnum.BLACK) {
+                                position_1 = new Position(1, 0);
+                                position_2 = new Position(2, 0);
+                            }
+                            else {
+                                position_1 = new Position(2, 7);
+                                position_2 = new Position(3, 7);
+                            }
+                        else
+                            if(player == ColorEnum.BLACK) {
+                                position_1 = new Position(5, 0);
+                                position_2 = new Position(4, 0);
+                            }
+                            else {
+                                position_1 = new Position(6, 7);
+                                position_2 = new Position(5, 7);
+                            }
+                        valid_position = true;
+                    }
+                    else if(couldTakeAPiece(position_1, position_2))
                         valid_position = isValidMovement(position_1, position_2);
                     else
                         valid_position = false;
@@ -91,9 +118,7 @@ public class Game {
     }
 
     private Position requestPosition() {
-        Scanner scanner = new Scanner(System.in);
-        String input = scanner.nextLine();
-        //scanner.close();
+        String input = new Scanner(System.in).nextLine();
         return new Position(input.charAt(0)-97, 7-(input.charAt(1)-49));
     }
 
@@ -232,8 +257,77 @@ public class Game {
     no deben haber piezas en entre el rey y la torre,
     el enrroque es moviendo el rey 2 casillas hacia la derecha o izquierda, y la torre, del lado al que se movio, salta sobre el rey
     */
-    private boolean couldMakeCastling() {
-        return true;
+    private boolean couldMakeCastling(Position pos_1, Position pos_2) {
+        Piece piece_1 = board.getPiece(pos_1);
+        Piece piece_2 = board.getPiece(pos_2);
+        if(piece_1.getNameOfPiece().equals(PieceEnum.ROOK)) {
+            Piece aux = piece_1;
+            piece_1 = piece_2;
+            piece_2 = aux;
+        }
+        if(piece_2.getColorOfPiece() == player) {
+            if(piece_1.getNameOfPiece().equals(PieceEnum.KING) && piece_2.getNameOfPiece().equals(PieceEnum.ROOK))
+                if(analizeTrajectory(pos_1, pos_2))
+                    if(!piece_1.getWasMoved() && !piece_2.getWasMoved()) {
+                        ArrayList<Position> positions = new ArrayList<>();
+                        if(pos_2.getX() == 0)
+                            if(player == ColorEnum.BLACK) {
+                                positions.add(new Position(1, 0));
+                                positions.add(new Position(2, 0));
+                                positions.add(new Position(3, 0));
+                            }
+                            else {
+                                positions.add(new Position(2, 7));
+                                positions.add(new Position(3, 7));
+                                positions.add(new Position(4, 7));
+                            }
+                        else
+                            if(player == ColorEnum.BLACK) {
+                                positions.add(new Position(3, 0));
+                                positions.add(new Position(4, 0));
+                                positions.add(new Position(5, 0));
+                            }
+                            else {
+                                positions.add(new Position(4, 7));
+                                positions.add(new Position(5, 7));
+                                positions.add(new Position(6, 7));
+                            }
+                        return !analizeIfItsAttacked(positions);
+                    }
+        }
+        return false;
+    }
+
+    private boolean thereIsCheck(Position pos_1) {
+        ArrayList<Position> position = new ArrayList<>();
+        position.add(pos_1);
+        return analizeIfItsAttacked(position);
+    }
+
+    private Position searchKing(ColorEnum c) {
+        for(int i = 0; i < 8; i++)
+            for(int j = 0; j < 8; j++)
+                if(board.getPiece(new Position(i, j)).getColorOfPiece() == player)
+                    return new Position(i, j);
+        return null;
+    }
+
+    private boolean analizeIfItsAttacked(ArrayList<Position> pos) {
+        ColorEnum player_aux;
+        ArrayList<Position> positions = new ArrayList<>();
+        if(player.equals(ColorEnum.BLACK))
+            player_aux = ColorEnum.WHITE;
+        else
+            player_aux = ColorEnum.BLACK;
+        for(int i = 0; i < 8; i++)
+            for(int j = 0; j < 8; j++)
+                if(board.getPiece(new Position(i, j)).getColorOfPiece().equals(player_aux))
+                    positions.add(new Position(i, j));
+        for(Position rival_position : positions) //analizo los movimientos de todas las fichas enemigas recopiladas y debo corroborar si atacan las posiciones pasadas por parametro
+            for(Position position_to_analize : pos)
+                if(isValidMovement(rival_position, position_to_analize))
+                    return true;
+        return false;
     }
 
     private boolean searchPositionInArray(ArrayList<Position> array_pos, Position pos) {
