@@ -14,10 +14,14 @@ import srs.pieces.Rook;
 public class Game {
     private Board board;
     private ColorEnum player;
+    private ArrayList<Piece> black_pieces_taken;
+    private ArrayList<Piece> white_pieces_taken;
 
     public Game() {
         board = new Board();
         player = ColorEnum.WHITE;
+        black_pieces_taken = new ArrayList<>();
+        white_pieces_taken = new ArrayList<>();
     }
 
     public void initializePieces() {
@@ -83,26 +87,32 @@ public class Game {
                         }
                         if(position_2.getX() == 0)
                             if(player == ColorEnum.BLACK) {
-                                position_1 = new Position(1, 0);
-                                position_2 = new Position(2, 0);
+                                board.movePiece(position_2, new Position(2, 0));
+                                position_2 = new Position(1, 0);
                             }
                             else {
-                                position_1 = new Position(2, 7);
-                                position_2 = new Position(3, 7);
+                                board.movePiece(position_2, new Position(3, 7));
+                                position_2 = new Position(2, 7);
                             }
                         else
                             if(player == ColorEnum.BLACK) {
-                                position_1 = new Position(5, 0);
-                                position_2 = new Position(4, 0);
+                                board.movePiece(position_2, new Position(4, 0));
+                                position_2 = new Position(5, 0);
                             }
                             else {
-                                position_1 = new Position(6, 7);
-                                position_2 = new Position(5, 7);
+                                board.movePiece(position_2, new Position(5, 7));
+                                position_2 = new Position(6, 7);
                             }
                         valid_position = true;
                     }
-                    else if(couldTakeAPiece(position_1, position_2))
+                    else if(couldTakeAPiece(position_1, position_2)) {
                         valid_position = isValidMovement(position_1, position_2);
+                        if(valid_position)
+                            if(player == ColorEnum.BLACK)
+                                white_pieces_taken.add(board.getPiece(position_2));
+                            else
+                                black_pieces_taken.add(board.getPiece(position_2));
+                    }
                     else
                         valid_position = false;
                 else
@@ -261,13 +271,16 @@ public class Game {
         Piece piece_1 = board.getPiece(pos_1);
         Piece piece_2 = board.getPiece(pos_2);
         if(piece_1.getNameOfPiece().equals(PieceEnum.ROOK)) {
-            Piece aux = piece_1;
+            Position aux_position = pos_1;
+            pos_1 = pos_2;
+            pos_2 = aux_position;
+            Piece aux_piece = piece_1;
             piece_1 = piece_2;
-            piece_2 = aux;
+            piece_2 = aux_piece;
         }
         if(piece_2.getColorOfPiece() == player) {
             if(piece_1.getNameOfPiece().equals(PieceEnum.KING) && piece_2.getNameOfPiece().equals(PieceEnum.ROOK))
-                if(analizeTrajectory(pos_1, pos_2))
+                if(analizeTrajectory(pos_2, pos_1))
                     if(!piece_1.getWasMoved() && !piece_2.getWasMoved()) {
                         ArrayList<Position> positions = new ArrayList<>();
                         if(pos_2.getX() == 0)
@@ -321,8 +334,9 @@ public class Game {
             player_aux = ColorEnum.BLACK;
         for(int i = 0; i < 8; i++)
             for(int j = 0; j < 8; j++)
-                if(board.getPiece(new Position(i, j)).getColorOfPiece().equals(player_aux))
-                    positions.add(new Position(i, j));
+                if(board.getPiece(new Position(i, j)) != null)
+                    if(board.getPiece(new Position(i, j)).getColorOfPiece().equals(player_aux))
+                        positions.add(new Position(i, j));
         for(Position rival_position : positions) //analizo los movimientos de todas las fichas enemigas recopiladas y debo corroborar si atacan las posiciones pasadas por parametro
             for(Position position_to_analize : pos)
                 if(isValidMovement(rival_position, position_to_analize))
@@ -339,10 +353,7 @@ public class Game {
     }
 
     public void showBoard() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
         int row = 8;
-        System.out.println("");
         for(int i = 0; i < 8; i++) {
             if(i == 0) {
                 System.out.println("||===||===============================================================================================||===||");
@@ -375,5 +386,50 @@ public class Game {
         System.out.println("||===||===============================================================================================||===||");
         System.out.println("||   ||     A     |     B     |     C     |     D     |     E     |     F     |     G     |     H     ||   ||");
         System.out.println("||===||===============================================================================================||===||");
+    }
+
+    public void showPiecesTaken() {
+        System.out.print("||====================|");
+        for(Piece piece : black_pieces_taken)
+            System.out.print("|===========");
+        if(black_pieces_taken.size() == 0)
+            System.out.print("|");
+        else
+            System.out.print("||");
+        System.out.print("\n|| BLACK PIECES TAKEN |");
+        for(Piece piece : black_pieces_taken)
+            System.out.printf("| %-10s", piece.getNameOfPiece());
+        if(black_pieces_taken.size() == 0)
+            System.out.print("|");
+        else
+            System.out.print("||");
+        System.out.print("\n||--------------------|");
+        for(Piece piece : black_pieces_taken)
+            System.out.print("|-----------");
+        if(black_pieces_taken.size() == 0)
+            System.out.print("|");
+        else
+            System.out.print("||");
+        System.out.print("\n||--------------------|");
+        for(Piece piece : white_pieces_taken)
+            System.out.print("|-----------");
+        if(white_pieces_taken.size() == 0)
+            System.out.print("|");
+        else
+            System.out.print("||");
+        System.out.print("\n|| WHITE PIECES TAKEN |");
+        for(Piece piece : white_pieces_taken)
+            System.out.printf("| %-10s", piece.getNameOfPiece());
+        if(white_pieces_taken.size() == 0)
+            System.out.print("|");
+        else
+            System.out.print("||");
+        System.out.print("\n||====================|");
+        for(Piece piece : white_pieces_taken)
+            System.out.print("|===========");
+        if(white_pieces_taken.size() == 0)
+            System.out.print("|");
+        else
+            System.out.print("||");
     }
 }
