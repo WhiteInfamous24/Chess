@@ -25,7 +25,7 @@ public class Game {
     }
 
     public void initializePieces() {
-        for(int i = 0; i < 8; i++) {
+        for (int i = 0; i < 8; i++) {
             board.setPiece(new Pawn(ColorEnum.BLACK), new Position(i, 1));
             board.setPiece(new Pawn(ColorEnum.WHITE), new Position(i, 6));
         }
@@ -48,7 +48,7 @@ public class Game {
     }
 
     public void changePlayer() {
-        if(player == ColorEnum.WHITE)
+        if (player.equals(ColorEnum.WHITE))
             player = ColorEnum.BLACK;
         else
             player = ColorEnum.WHITE;
@@ -63,30 +63,30 @@ public class Game {
             System.out.print("Pieza a mover: ");
             position_1 = requestPosition();
             try {
-                if(board.getPiece(position_1) != null)
-                    valid_position = board.getPiece(position_1).getColorOfPiece() == player;
+                if (board.getPiece(position_1) != null)
+                    valid_position = board.getPiece(position_1).getColorOfPiece().equals(player);
                 else
                     valid_position = false;
             } catch (IndexOutOfBoundsException e) {
                 System.out.println("-IndexOutOfBoundsException-");
                 valid_position = false;
             }
-            if(!valid_position)
+            if (!valid_position)
                 System.out.println("POSICION NO VALIDA");
-        } while(!valid_position);
+        } while (!valid_position);
         do {
             System.out.print("Mover a casilla: ");
             position_2 = requestPosition();
             try {
-                if(board.getPiece(position_2) != null)
-                    if(couldMakeCastling(position_1, position_2)) {
-                        if(board.getPiece(position_1).getNameOfPiece().equals(PieceEnum.ROOK)) {
+                if (board.getPiece(position_2) != null)
+                    if (couldMakeCastling(position_1, position_2)) {
+                        if (board.getPiece(position_1).getNameOfPiece().equals(PieceEnum.ROOK)) {
                             Position aux = position_1;
                             position_1 = position_2;
                             position_2 = aux;
                         }
-                        if(position_2.getX() == 0)
-                            if(player == ColorEnum.BLACK) {
+                        if (position_2.getX() == 0)
+                            if (player.equals(ColorEnum.BLACK)) {
                                 board.movePiece(position_2, new Position(2, 0));
                                 position_2 = new Position(1, 0);
                             }
@@ -95,7 +95,7 @@ public class Game {
                                 position_2 = new Position(2, 7);
                             }
                         else
-                            if(player == ColorEnum.BLACK) {
+                            if (player.equals(ColorEnum.BLACK)) {
                                 board.movePiece(position_2, new Position(4, 0));
                                 position_2 = new Position(5, 0);
                             }
@@ -105,10 +105,10 @@ public class Game {
                             }
                         valid_position = true;
                     }
-                    else if(couldTakeAPiece(position_1, position_2)) {
+                    else if (couldTakeAPiece(position_1, position_2)) {
                         valid_position = isValidMovement(position_1, position_2);
-                        if(valid_position)
-                            if(player == ColorEnum.BLACK)
+                        if (valid_position)
+                            if (player == ColorEnum.BLACK)
                                 white_pieces_taken.add(board.getPiece(position_2));
                             else
                                 black_pieces_taken.add(board.getPiece(position_2));
@@ -121,9 +121,9 @@ public class Game {
                 System.out.println("-IndexOutOfBoundsException-");
                 valid_position = false;
             }
-            if(!valid_position)
+            if (!valid_position)
                 System.out.println("POSICION NO VALIDA");
-        } while(!valid_position);
+        } while (!valid_position);
         board.movePiece(position_1, position_2);
     }
 
@@ -135,9 +135,9 @@ public class Game {
     private boolean isValidMovement(Position pos_1, Position pos_2) {
         ArrayList<Position> possible_movements = board.getPiece(pos_1).possibleMovements(pos_1);
         ArrayList<Position> possible_takes = board.getPiece(pos_1).possibleTakes(pos_1);
-        if(searchPositionInArray(possible_takes, pos_2) && board.getPiece(pos_2) != null) //veo si la posicion final se encuentra en una posicion de toma valido de la pieza
+        if (searchPositionInArray(possible_takes, pos_2) && board.getPiece(pos_2) != null) //veo si la posicion final se encuentra en una posicion de toma valido de la pieza
             return analizeTrajectory(pos_1, pos_2);
-        else if(searchPositionInArray(possible_movements, pos_2)) //veo si la posicion final se encuentra en una posicion de movimiento valido de la pieza
+        else if (searchPositionInArray(possible_movements, pos_2)) //veo si la posicion final se encuentra en una posicion de movimiento valido de la pieza
             return analizeTrajectory(pos_1, pos_2);
         else
             return false;
@@ -148,98 +148,98 @@ public class Game {
     a excepcion de la posicion final donde puede llegar a haber una pieza cualquiera
     */
     private boolean analizeTrajectory(Position pos_1, Position pos_2) {
-        if(board.getPiece(pos_1).getLongMovement()) { //veo si la pieza realiza movimientos de trayectoria
+        if (board.getPiece(pos_1).getLongMovement()) { //veo si la pieza realiza movimientos de trayectoria
             boolean no_obstruction = true;
             int x_1 = pos_1.getX();
             int y_1 = pos_1.getY();
             int x_2 = pos_2.getX();
             int y_2 = pos_2.getY();
             int MAX;
-            if(x_2 == x_1) { //verifico si me muevo unicamente sobre el eje Y
-                if(y_2 > y_1) { //analizo movimiento para +Y
+            if (x_2 == x_1) { //verifico si me muevo unicamente sobre el eje Y
+                if (y_2 > y_1) { //analizo movimiento para +Y
                     MAX = y_2-y_1; //seteo el limite de iteraciones para no salirme del tablero para +Y
-                    for(int i = 1; i < MAX; i++) { //analizo movimiento para +Y
-                        if(board.getPiece(new Position(x_1, y_1+i)) != null && y_1+i != y_2)
+                    for (int i = 1; i < MAX; i++) { //analizo movimiento para +Y
+                        if (board.getPiece(new Position(x_1, y_1+i)) != null && y_1+i != y_2)
                             no_obstruction = false;
-                        if(y_1+i == y_2) //analizo si llego a la posicion final y se retorna si hay obstruccion
+                        if (y_1+i == y_2) //analizo si llego a la posicion final y se retorna si hay obstruccion
                             return no_obstruction;
                     }
                 }
                 else { //analizo movimiento para -Y
                     MAX = y_1-y_2; //seteo el limite de iteraciones para no salirme del tablero para -Y
-                    for(int i = 1; i < MAX; i++) {
-                        if(board.getPiece(new Position(x_1, y_1-i)) != null && y_1-i != y_2)
+                    for (int i = 1; i < MAX; i++) {
+                        if (board.getPiece(new Position(x_1, y_1-i)) != null && y_1-i != y_2)
                             no_obstruction = false;
-                        if(y_1-i == y_2) //analizo si llego a la posicion final y se retorna si hay obstruccion
+                        if (y_1-i == y_2) //analizo si llego a la posicion final y se retorna si hay obstruccion
                             return no_obstruction;
                     }
                 }
             }
-            else if(y_2 == y_1) { //verifico si me muevo unicamente sobre el eje X
-                if(x_2 > x_1) { //analizo movimiento para +X
+            else if (y_2 == y_1) { //verifico si me muevo unicamente sobre el eje X
+                if (x_2 > x_1) { //analizo movimiento para +X
                     MAX = x_2-x_1; //seteo el limite de iteraciones para no salirme del tablero para +X
-                    for(int i = 1; i < MAX; i++) { //analizo movimiento para +X
-                        if(board.getPiece(new Position(x_1+i, y_1)) != null && x_1+i != x_2)
+                    for (int i = 1; i < MAX; i++) { //analizo movimiento para +X
+                        if (board.getPiece(new Position(x_1+i, y_1)) != null && x_1+i != x_2)
                             no_obstruction = false;
-                        if(x_1+i == x_2) //analizo si llego a la posicion final y se retorna si hay obstruccion
+                        if (x_1+i == x_2) //analizo si llego a la posicion final y se retorna si hay obstruccion
                             return no_obstruction;
                     }
                 }
                 else { //analizo movimiento para -X
                     MAX = x_1-x_2; //seteo el limite de iteraciones para no salirme del tablero para -X
-                    for(int i = 1; i < MAX; i++) {
-                        if(board.getPiece(new Position(x_1-i, y_1)) != null && x_1-i != x_2)
+                    for (int i = 1; i < MAX; i++) {
+                        if (board.getPiece(new Position(x_1-i, y_1)) != null && x_1-i != x_2)
                             no_obstruction = false;
-                        if(x_1-i == x_2) //analizo si llego a la posicion final y se retorna si hay obstruccion
+                        if (x_1-i == x_2) //analizo si llego a la posicion final y se retorna si hay obstruccion
                             return no_obstruction;
                     }
                 }
             }
-            else if(x_2 > x_1 && y_2 > y_1) { //verifico si me muevo unicamente en direccion +X+Y
-                if(8-x_1 < 8-y_1) //seteo el limite de iteraciones para no salirme del tablero buscando el eje mas chico
+            else if (x_2 > x_1 && y_2 > y_1) { //verifico si me muevo unicamente en direccion +X+Y
+                if (8-x_1 < 8-y_1) //seteo el limite de iteraciones para no salirme del tablero buscando el eje mas chico
                     MAX = x_2-x_1;
                 else
                     MAX = y_2-y_1;
-                for(int i = 1; i < MAX; i++) { //analizo movimiento
-                    if(board.getPiece(new Position(x_1+i, y_1+i)) != null && y_1+i != y_2)
+                for (int i = 1; i < MAX; i++) { //analizo movimiento
+                    if (board.getPiece(new Position(x_1+i, y_1+i)) != null && y_1+i != y_2)
                         no_obstruction = false;
-                    if(y_1+i == y_2) //analizo si llego a la posicion final y se retorna si hay obstruccion
+                    if (y_1+i == y_2) //analizo si llego a la posicion final y se retorna si hay obstruccion
                         return no_obstruction;
                 }
             }
-            else if(x_2 > x_1 && y_2 < y_1) { //verifico si me muevo unicamente en el eje +X-Y
-                if(8-x_1 < y_1+1) //seteo el limite de iteraciones para no salirme del tablero buscando el eje mas chico
+            else if (x_2 > x_1 && y_2 < y_1) { //verifico si me muevo unicamente en el eje +X-Y
+                if (8-x_1 < y_1+1) //seteo el limite de iteraciones para no salirme del tablero buscando el eje mas chico
                     MAX = x_2-x_1;
                 else
                     MAX = y_1-y_2;
-                for(int i = 1; i < MAX; i++) { //analizo movimiento
-                    if(board.getPiece(new Position(x_1+i, y_1-i)) != null && y_1-i != y_2)
+                for (int i = 1; i < MAX; i++) { //analizo movimiento
+                    if (board.getPiece(new Position(x_1+i, y_1-i)) != null && y_1-i != y_2)
                         no_obstruction = false;
-                    if(y_1-i == y_2) //analizo si llego a la posicion final y se retorna si hay obstruccion
+                    if (y_1-i == y_2) //analizo si llego a la posicion final y se retorna si hay obstruccion
                         return no_obstruction;
                 }
             }
-            else if(x_2 < x_1 && y_2 > y_1) { //verifico si me muevo unicamente en el eje -X+Y
-                if(8-x_1 < 8-y_1) //seteo el limite de iteraciones para no salirme del tablero buscando el eje mas chico
+            else if (x_2 < x_1 && y_2 > y_1) { //verifico si me muevo unicamente en el eje -X+Y
+                if (8-x_1 < 8-y_1) //seteo el limite de iteraciones para no salirme del tablero buscando el eje mas chico
                     MAX = x_1-x_2;
                 else
                     MAX = y_2-y_1;
-                for(int i = 1; i < MAX; i++) { //analizo movimiento
-                    if(board.getPiece(new Position(x_1-i, y_1+i)) != null && y_1+i != y_2)
+                for (int i = 1; i < MAX; i++) { //analizo movimiento
+                    if (board.getPiece(new Position(x_1-i, y_1+i)) != null && y_1+i != y_2)
                         no_obstruction = false;
-                    if(y_1+i == y_2) //analizo si llego a la posicion final y se retorna si hay obstruccion
+                    if (y_1+i == y_2) //analizo si llego a la posicion final y se retorna si hay obstruccion
                         return no_obstruction;
                 }
             }
-            else if(x_2 < x_1 && y_2 < y_1) { //verifico si me muevo unicamente en el eje -X-Y
-                if(8-x_1 < 8-y_1) //seteo el limite de iteraciones para no salirme del tablero buscando el eje mas chico
+            else if (x_2 < x_1 && y_2 < y_1) { //verifico si me muevo unicamente en el eje -X-Y
+                if (8-x_1 < 8-y_1) //seteo el limite de iteraciones para no salirme del tablero buscando el eje mas chico
                     MAX = x_1-x_2;
                 else
                     MAX = y_1-y_2;
-                for(int i = 1; i < MAX; i++) { //analizo movimiento
-                    if(board.getPiece(new Position(x_1-i, y_1-i)) != null && y_1-i != y_2)
+                for (int i = 1; i < MAX; i++) { //analizo movimiento
+                    if (board.getPiece(new Position(x_1-i, y_1-i)) != null && y_1-i != y_2)
                         no_obstruction = false;
-                    if(y_1-i == y_2) //analizo si llego a la posicion final y se retorna si hay obstruccion
+                    if (y_1-i == y_2) //analizo si llego a la posicion final y se retorna si hay obstruccion
                         return no_obstruction;
                 }
             }
@@ -254,8 +254,8 @@ public class Game {
     y en caso de ser una pieza rival, se analizaran los movimientos predefinidos de cada pieza para ver si puede comer
     */
     private boolean couldTakeAPiece(Position pos_1, Position pos_2) {
-        if(board.getPiece(pos_2) != null)
-            if(board.getPiece(pos_2).getColorOfPiece() != player)
+        if (board.getPiece(pos_2) != null)
+            if (!board.getPiece(pos_2).getColorOfPiece().equals(player))
                 return searchPositionInArray(board.getPiece(pos_1).possibleTakes(pos_1), pos_2);
         return false;
     }
@@ -270,7 +270,7 @@ public class Game {
     private boolean couldMakeCastling(Position pos_1, Position pos_2) {
         Piece piece_1 = board.getPiece(pos_1);
         Piece piece_2 = board.getPiece(pos_2);
-        if(piece_1.getNameOfPiece().equals(PieceEnum.ROOK)) {
+        if (piece_1.getNameOfPiece().equals(PieceEnum.ROOK)) {
             Position aux_position = pos_1;
             pos_1 = pos_2;
             pos_2 = aux_position;
@@ -278,13 +278,13 @@ public class Game {
             piece_1 = piece_2;
             piece_2 = aux_piece;
         }
-        if(piece_2.getColorOfPiece() == player) {
-            if(piece_1.getNameOfPiece().equals(PieceEnum.KING) && piece_2.getNameOfPiece().equals(PieceEnum.ROOK))
-                if(analizeTrajectory(pos_2, pos_1))
-                    if(!piece_1.getWasMoved() && !piece_2.getWasMoved()) {
+        if (piece_2.getColorOfPiece() == player) {
+            if (piece_1.getNameOfPiece().equals(PieceEnum.KING) && piece_2.getNameOfPiece().equals(PieceEnum.ROOK))
+                if (analizeTrajectory(pos_2, pos_1))
+                    if (!piece_1.getWasMoved() && !piece_2.getWasMoved()) {
                         ArrayList<Position> positions = new ArrayList<>();
-                        if(pos_2.getX() == 0)
-                            if(player == ColorEnum.BLACK) {
+                        if (pos_2.getX() == 0)
+                            if (player.equals(ColorEnum.BLACK)) {
                                 positions.add(new Position(1, 0));
                                 positions.add(new Position(2, 0));
                                 positions.add(new Position(3, 0));
@@ -295,7 +295,7 @@ public class Game {
                                 positions.add(new Position(4, 7));
                             }
                         else
-                            if(player == ColorEnum.BLACK) {
+                            if (player.equals(ColorEnum.BLACK)) {
                                 positions.add(new Position(3, 0));
                                 positions.add(new Position(4, 0));
                                 positions.add(new Position(5, 0));
@@ -318,44 +318,84 @@ public class Game {
     }
 
     private Position searchKing(ColorEnum c) {
-        for(int i = 0; i < 8; i++)
-            for(int j = 0; j < 8; j++)
-                if(board.getPiece(new Position(i, j)).getColorOfPiece() == player)
+        for (int i = 0; i < 8; i++)
+            for (int j = 0; j < 8; j++)
+                if (board.getPiece(new Position(i, j)).getNameOfPiece().equals(PieceEnum.KING) && board.getPiece(new Position(i, j)).getColorOfPiece().equals(player))
                     return new Position(i, j);
         return null;
+    }
+
+    public void analizePawnPromotion() {
+        Position position = null;
+        for (int i = 0; i < 8; i++) {
+            if (player.equals(ColorEnum.BLACK))
+                if (board.getPiece(new Position(i, 7)) != null)
+                    if (board.getPiece(new Position(i, 7)).getNameOfPiece().equals(PieceEnum.PAWN))
+                        position = new Position (i, 7);
+            if (player.equals(ColorEnum.WHITE))
+                if (board.getPiece(new Position(i, 0)) != null)
+                    if (board.getPiece(new Position(i, 0)).getNameOfPiece().equals(PieceEnum.PAWN))
+                        position = new Position(i, 0);
+        }
+        if (position != null)
+            board.setPiece(requestToChoosePiece(), position);
+    }
+
+    private Piece requestToChoosePiece() {
+        Piece piece;
+        System.out.print("Seleccionar pieza (Bishop, Knight, Rook, Queen): ");
+        String input = new Scanner(System.in).nextLine().toUpperCase();
+        switch (input) {
+            case "BISHOP":
+                piece = new Bishop(player);
+                break;
+            case "KNIGHT":
+                piece = new Knight(player);
+                break;
+            case "ROOK":
+                piece = new Rook(player);
+                break;
+            case "QUEEN":
+                piece = new Queen(player);
+                break;
+            default:
+                piece = new Queen(player);
+                break;
+        }
+        return piece;
     }
 
     private boolean analizeIfItsAttacked(ArrayList<Position> pos) {
         ColorEnum player_aux;
         ArrayList<Position> positions = new ArrayList<>();
-        if(player.equals(ColorEnum.BLACK))
+        if (player.equals(ColorEnum.BLACK))
             player_aux = ColorEnum.WHITE;
         else
             player_aux = ColorEnum.BLACK;
-        for(int i = 0; i < 8; i++)
-            for(int j = 0; j < 8; j++)
-                if(board.getPiece(new Position(i, j)) != null)
-                    if(board.getPiece(new Position(i, j)).getColorOfPiece().equals(player_aux))
+        for (int i = 0; i < 8; i++)
+            for (int j = 0; j < 8; j++)
+                if (board.getPiece(new Position(i, j)) != null)
+                    if (board.getPiece(new Position(i, j)).getColorOfPiece().equals(player_aux))
                         positions.add(new Position(i, j));
-        for(Position rival_position : positions) //analizo los movimientos de todas las fichas enemigas recopiladas y debo corroborar si atacan las posiciones pasadas por parametro
-            for(Position position_to_analize : pos)
-                if(isValidMovement(rival_position, position_to_analize))
+        for (Position rival_position : positions) //analizo los movimientos de todas las fichas enemigas recopiladas y debo corroborar si atacan las posiciones pasadas por parametro
+            for (Position position_to_analize : pos)
+                if (isValidMovement(rival_position, position_to_analize))
                     return true;
         return false;
     }
 
     private boolean searchPositionInArray(ArrayList<Position> array_pos, Position pos) {
         boolean output = false;
-        for(Position position : array_pos)
-            if(position.getX() == pos.getX() && position.getY() == pos.getY())
+        for (Position position : array_pos)
+            if (position.getX() == pos.getX() && position.getY() == pos.getY())
                 output = true;
         return output;
     }
 
     public void showBoard() {
         int row = 8;
-        for(int i = 0; i < 8; i++) {
-            if(i == 0) {
+        for (int i = 0; i < 8; i++) {
+            if (i == 0) {
                 System.out.println("||===||===============================================================================================||===||");
                 System.out.println("||   ||     A     |     B     |     C     |     D     |     E     |     F     |     G     |     H     ||   ||");
                 System.out.println("||===||===============================================================================================||===||");
@@ -363,18 +403,18 @@ public class Game {
             else
                 System.out.println("||---||-----------|-----------|-----------|-----------|-----------|-----------|-----------|-----------||---||");
             System.out.print("||   |");
-            for(int j = 0; j < 8; j++) { 
+            for (int j = 0; j < 8; j++) { 
                 System.out.print("|");
-                if(board.getPiece(new Position(j, i)) != null)
+                if (board.getPiece(new Position(j, i)) != null)
                     System.out.printf(" %-10s", board.getPiece(new Position(j, i)).getNameOfPiece());
                 else
                     System.out.printf("%11s", " ");
             }
             System.out.println("||   ||");
             System.out.print("|| " + row +" |");
-            for(int j = 0; j < 8; j++) {
+            for (int j = 0; j < 8; j++) {
                 System.out.print("|");
-                if(board.getPiece(new Position(j, i)) != null)
+                if (board.getPiece(new Position(j, i)) != null)
                     System.out.printf(" %-10s", board.getPiece(new Position(j, i)).getColorOfPiece());
                 else
                     System.out.printf("%11s", " ");
@@ -390,44 +430,44 @@ public class Game {
 
     public void showPiecesTaken() {
         System.out.print("||====================|");
-        for(Piece piece : black_pieces_taken)
+        for (Piece piece : black_pieces_taken)
             System.out.print("|===========");
-        if(black_pieces_taken.size() == 0)
+        if (black_pieces_taken.size() == 0)
             System.out.print("|");
         else
             System.out.print("||");
         System.out.print("\n|| BLACK PIECES TAKEN |");
-        for(Piece piece : black_pieces_taken)
+        for (Piece piece : black_pieces_taken)
             System.out.printf("| %-10s", piece.getNameOfPiece());
-        if(black_pieces_taken.size() == 0)
+        if (black_pieces_taken.size() == 0)
             System.out.print("|");
         else
             System.out.print("||");
         System.out.print("\n||--------------------|");
-        for(Piece piece : black_pieces_taken)
+        for (Piece piece : black_pieces_taken)
             System.out.print("|-----------");
-        if(black_pieces_taken.size() == 0)
+        if (black_pieces_taken.size() == 0)
             System.out.print("|");
         else
             System.out.print("||");
         System.out.print("\n||--------------------|");
-        for(Piece piece : white_pieces_taken)
+        for (Piece piece : white_pieces_taken)
             System.out.print("|-----------");
-        if(white_pieces_taken.size() == 0)
+        if (white_pieces_taken.size() == 0)
             System.out.print("|");
         else
             System.out.print("||");
         System.out.print("\n|| WHITE PIECES TAKEN |");
-        for(Piece piece : white_pieces_taken)
+        for (Piece piece : white_pieces_taken)
             System.out.printf("| %-10s", piece.getNameOfPiece());
-        if(white_pieces_taken.size() == 0)
+        if (white_pieces_taken.size() == 0)
             System.out.print("|");
         else
             System.out.print("||");
         System.out.print("\n||====================|");
-        for(Piece piece : white_pieces_taken)
+        for (Piece piece : white_pieces_taken)
             System.out.print("|===========");
-        if(white_pieces_taken.size() == 0)
+        if (white_pieces_taken.size() == 0)
             System.out.print("|");
         else
             System.out.print("||");

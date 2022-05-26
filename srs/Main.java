@@ -15,8 +15,15 @@ public class Main {
         System.out.println("");
         game.showPiecesTaken();
         System.out.println("");
-        while(true) {
+        while (true) {
             game.movePiece();
+            System.out.print("\033[H\033[2J");
+            System.out.flush();
+            game.showBoard();
+            System.out.println("");
+            game.showPiecesTaken();
+            System.out.println("\n");
+            game.analizePawnPromotion();
             System.out.print("\033[H\033[2J");
             System.out.flush();
             game.showBoard();
