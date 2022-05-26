@@ -8,6 +8,7 @@ import srs.pieces.Bishop;
 import srs.pieces.King;
 import srs.pieces.Knight;
 import srs.pieces.Pawn;
+import srs.pieces.Piece;
 import srs.pieces.Queen;
 import srs.pieces.Rook;
 
