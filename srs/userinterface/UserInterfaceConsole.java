@@ -1,10 +1,16 @@
 package srs.userinterface;
 
 import java.util.ArrayList;
+import java.util.Scanner;
+
 import srs.Board;
 import srs.Position;
 import srs.enums.ColorEnum;
+import srs.pieces.Bishop;
+import srs.pieces.Knight;
 import srs.pieces.Piece;
+import srs.pieces.Queen;
+import srs.pieces.Rook;
 
 public class UserInterfaceConsole implements UserInterface {
     public UserInterfaceConsole() {
@@ -19,12 +25,45 @@ public class UserInterfaceConsole implements UserInterface {
         System.out.println("POSICION NO VALIDA");
     }
 
-    public void requestFirstPositionMessage() {
-
+    public Position requestFirstPositionMessage() {
+        System.out.print("Pieza a mover: ");
+        String input = new Scanner(System.in).nextLine();
+        return new Position(input.charAt(0)-97, 7-(input.charAt(1)-49));
     }
 
-    public void requestSecondPositionMessage() {
+    public Position requestSecondPositionMessage() {
+        System.out.print("Mover a casilla: ");
+        String input = new Scanner(System.in).nextLine();
+        return new Position(input.charAt(0)-97, 7-(input.charAt(1)-49));
+    }
 
+    public Piece requestToChoosePiece(ColorEnum c) {
+        Piece piece;
+        System.out.print("Seleccione una pieza:");
+        System.out.println("\n'1' ----> Bishop");
+        System.out.println("'2' ----> Knight");
+        System.out.println("'3' ----> Rook");
+        System.out.println("'4' ----> Queen\n");
+        System.out.println("(default) Queen\n");
+        char input = new Scanner(System.in).nextLine().charAt(0);
+        switch (input) {
+            case '1':
+                piece = new Bishop(c);
+                break;
+            case '2':
+                piece = new Knight(c);
+                break;
+            case '3':
+                piece = new Rook(c);
+                break;
+            case '4':
+                piece = new Queen(c);
+                break;
+            default:
+                piece = new Queen(c);
+                break;
+        }
+        return piece;
     }
 
     public void showBoard(Board b) {

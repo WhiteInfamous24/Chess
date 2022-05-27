@@ -1,9 +1,15 @@
 package srs.userinterface;
 
 import java.util.ArrayList;
+
 import srs.Board;
+import srs.Position;
 import srs.enums.ColorEnum;
+import srs.pieces.Bishop;
+import srs.pieces.Knight;
 import srs.pieces.Piece;
+import srs.pieces.Queen;
+import srs.pieces.Rook;
 
 public class UserInterfaceWindows implements UserInterface {
     public UserInterfaceWindows() {
@@ -18,12 +24,16 @@ public class UserInterfaceWindows implements UserInterface {
 
     }
 
-    public void requestFirstPositionMessage() {
-
+    public Position requestFirstPositionMessage() {
+        return new Position(0, 0);
     }
 
-    public void requestSecondPositionMessage() {
+    public Position requestSecondPositionMessage() {
+        return new Position(0, 0);
+    }
 
+    public Piece requestToChoosePiece(ColorEnum c) {
+        return new Queen(c);
     }
 
     public void showBoard(Board b) {

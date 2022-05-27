@@ -2,6 +2,7 @@ package srs;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+
 import srs.enums.ColorEnum;
 import srs.enums.PieceEnum;
 import srs.pieces.Bishop;
@@ -34,8 +35,9 @@ public class Game {
         System.out.print("\033[H\033[2J");
         System.out.flush();
         System.out.println("Select desired user interface:");
-        System.out.println("\n1 -> Console");
-        System.out.println("2 -> Windows\n");
+        System.out.println("\n'1' ----> Console");
+        System.out.println("'2' ----> Windows\n");
+        System.out.println("(default) Console\n");
         char input = new Scanner(System.in).nextLine().charAt(0);
         switch (input) {
             case '1':
@@ -90,12 +92,9 @@ public class Game {
 
     private Position requestFirstPosition() {
         Position position;
-        String input;
         boolean valid_position;
         do {
-            System.out.print("Pieza a mover: ");
-            input = new Scanner(System.in).nextLine();
-            position = new Position(input.charAt(0)-97, 7-(input.charAt(1)-49));
+            position = user_interface.requestFirstPositionMessage();
             try {
                 if (board.getPiece(position) != null)
                     valid_position = board.getPiece(position).getColorOfPiece().equals(player);
@@ -113,12 +112,9 @@ public class Game {
 
     private Position requestSecondPosition(Position pos) {
         Position position;
-        String input;
         boolean valid_position;
         do {
-            System.out.print("Mover a casilla: ");
-            input = new Scanner(System.in).nextLine();
-            position = new Position(input.charAt(0)-97, 7-(input.charAt(1)-49));
+            position = user_interface.requestSecondPositionMessage();
             try {
                 if (board.getPiece(position) != null)
                     if (couldMakeCastling(pos, position)) {
@@ -375,31 +371,7 @@ public class Game {
                         position = new Position(i, 0);
         }
         if (position != null)
-            board.setPiece(requestToChoosePiece(), position);
-    }
-
-    private Piece requestToChoosePiece() {
-        Piece piece;
-        System.out.print("Seleccionar pieza (Bishop, Knight, Rook, Queen): ");
-        String input = new Scanner(System.in).nextLine().toUpperCase();
-        switch (input) {
-            case "BISHOP":
-                piece = new Bishop(player);
-                break;
-            case "KNIGHT":
-                piece = new Knight(player);
-                break;
-            case "ROOK":
-                piece = new Rook(player);
-                break;
-            case "QUEEN":
-                piece = new Queen(player);
-                break;
-            default:
-                piece = new Queen(player);
-                break;
-        }
-        return piece;
+            board.setPiece(user_interface.requestToChoosePiece(player), position);
     }
 
     private boolean analizeIfItsAttacked(ArrayList<Position> pos) {
