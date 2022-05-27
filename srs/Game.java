@@ -11,18 +11,43 @@ import srs.pieces.Pawn;
 import srs.pieces.Piece;
 import srs.pieces.Queen;
 import srs.pieces.Rook;
+import srs.userinterface.UserInterface;
+import srs.userinterface.UserInterfaceConsole;
+import srs.userinterface.UserInterfaceWindows;
 
 public class Game {
     private Board board;
     private ColorEnum player;
     private ArrayList<Piece> black_pieces_taken;
     private ArrayList<Piece> white_pieces_taken;
+    private UserInterface user_interface;
 
     public Game() {
         board = new Board();
         player = ColorEnum.WHITE;
         black_pieces_taken = new ArrayList<>();
         white_pieces_taken = new ArrayList<>();
+        askForUserInterface();
+    }
+
+    public void askForUserInterface() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+        System.out.println("Select desired user interface:");
+        System.out.println("\n1 -> Console");
+        System.out.println("2 -> Windows\n");
+        char input = new Scanner(System.in).nextLine().charAt(0);
+        switch (input) {
+            case '1':
+                user_interface = new UserInterfaceConsole();
+                break;
+            case '2':
+                user_interface = new UserInterfaceWindows();
+                break;
+            default:
+                user_interface = new UserInterfaceConsole();
+                break;
+        }
     }
 
     public void initializePieces() {
@@ -58,14 +83,22 @@ public class Game {
     public void movePiece() throws IndexOutOfBoundsException {
         Position position_1;
         Position position_2;
+        position_1 = requestFirstPosition();
+        position_2 = requestSecondPosition(position_1);
+        board.movePiece(position_1, position_2);
+    }
+
+    private Position requestFirstPosition() {
+        Position position;
+        String input;
         boolean valid_position;
-        System.out.println("\nTURNO DE " + player + "\n");
         do {
             System.out.print("Pieza a mover: ");
-            position_1 = requestPosition();
+            input = new Scanner(System.in).nextLine();
+            position = new Position(input.charAt(0)-97, 7-(input.charAt(1)-49));
             try {
-                if (board.getPiece(position_1) != null)
-                    valid_position = board.getPiece(position_1).getColorOfPiece().equals(player);
+                if (board.getPiece(position) != null)
+                    valid_position = board.getPiece(position).getColorOfPiece().equals(player);
                 else
                     valid_position = false;
             } catch (IndexOutOfBoundsException e) {
@@ -73,64 +106,67 @@ public class Game {
                 valid_position = false;
             }
             if (!valid_position)
-                System.out.println("POSICION NO VALIDA");
+                user_interface.invalidPositionMessage();
         } while (!valid_position);
+        return position;
+    }
+
+    private Position requestSecondPosition(Position pos) {
+        Position position;
+        String input;
+        boolean valid_position;
         do {
             System.out.print("Mover a casilla: ");
-            position_2 = requestPosition();
+            input = new Scanner(System.in).nextLine();
+            position = new Position(input.charAt(0)-97, 7-(input.charAt(1)-49));
             try {
-                if (board.getPiece(position_2) != null)
-                    if (couldMakeCastling(position_1, position_2)) {
-                        if (board.getPiece(position_1).getNameOfPiece().equals(PieceEnum.ROOK)) {
-                            Position aux = position_1;
-                            position_1 = position_2;
-                            position_2 = aux;
+                if (board.getPiece(position) != null)
+                    if (couldMakeCastling(pos, position)) {
+                        if (board.getPiece(pos).getNameOfPiece().equals(PieceEnum.ROOK)) {
+                            Position aux = pos;
+                            pos = position;
+                            position = aux;
                         }
-                        if (position_2.getX() == 0)
+                        if (position.getX() == 0)
                             if (player.equals(ColorEnum.BLACK)) {
-                                board.movePiece(position_2, new Position(2, 0));
-                                position_2 = new Position(1, 0);
+                                board.movePiece(position, new Position(2, 0));
+                                position = new Position(1, 0);
                             }
                             else {
-                                board.movePiece(position_2, new Position(3, 7));
-                                position_2 = new Position(2, 7);
+                                board.movePiece(position, new Position(3, 7));
+                                position = new Position(2, 7);
                             }
                         else
                             if (player.equals(ColorEnum.BLACK)) {
-                                board.movePiece(position_2, new Position(4, 0));
-                                position_2 = new Position(5, 0);
+                                board.movePiece(position, new Position(4, 0));
+                                position = new Position(5, 0);
                             }
                             else {
-                                board.movePiece(position_2, new Position(5, 7));
-                                position_2 = new Position(6, 7);
+                                board.movePiece(position, new Position(5, 7));
+                                position = new Position(6, 7);
                             }
                         valid_position = true;
                     }
-                    else if (couldTakeAPiece(position_1, position_2)) {
-                        valid_position = isValidMovement(position_1, position_2);
+                    else if (couldTakeAPiece(pos, position)) {
+                        valid_position = isValidMovement(pos, position);
                         if (valid_position)
-                            if (player == ColorEnum.BLACK)
-                                white_pieces_taken.add(board.getPiece(position_2));
+                            if (player.equals(ColorEnum.BLACK))
+                                white_pieces_taken.add(board.getPiece(position));
                             else
-                                black_pieces_taken.add(board.getPiece(position_2));
+                                black_pieces_taken.add(board.getPiece(position));
                     }
                     else
                         valid_position = false;
                 else
-                    valid_position = isValidMovement(position_1, position_2);
+                    valid_position = isValidMovement(pos, position);
             } catch (IndexOutOfBoundsException e) {
                 System.out.println("-IndexOutOfBoundsException-");
                 valid_position = false;
             }
             if (!valid_position)
-                System.out.println("POSICION NO VALIDA");
+                user_interface.invalidPositionMessage();
         } while (!valid_position);
-        board.movePiece(position_1, position_2);
-    }
-
-    private Position requestPosition() {
-        String input = new Scanner(System.in).nextLine();
-        return new Position(input.charAt(0)-97, 7-(input.charAt(1)-49));
+        return position;
     }
 
     private boolean isValidMovement(Position pos_1, Position pos_2) {
@@ -393,84 +429,19 @@ public class Game {
         return output;
     }
 
+    public UserInterface getUserInterface() {
+        return user_interface;
+    }
+
+    public void playerTurnMessage() {
+        user_interface.playerTurnMessage(player);
+    }
+
     public void showBoard() {
-        int row = 8;
-        for (int i = 0; i < 8; i++) {
-            if (i == 0) {
-                System.out.println("||===||===============================================================================================||===||");
-                System.out.println("||   ||     A     |     B     |     C     |     D     |     E     |     F     |     G     |     H     ||   ||");
-                System.out.println("||===||===============================================================================================||===||");
-            }
-            else
-                System.out.println("||---||-----------|-----------|-----------|-----------|-----------|-----------|-----------|-----------||---||");
-            System.out.print("||   |");
-            for (int j = 0; j < 8; j++) { 
-                System.out.print("|");
-                if (board.getPiece(new Position(j, i)) != null)
-                    System.out.printf(" %-10s", board.getPiece(new Position(j, i)).getNameOfPiece());
-                else
-                    System.out.printf("%11s", " ");
-            }
-            System.out.println("||   ||");
-            System.out.print("|| " + row +" |");
-            for (int j = 0; j < 8; j++) {
-                System.out.print("|");
-                if (board.getPiece(new Position(j, i)) != null)
-                    System.out.printf(" %-10s", board.getPiece(new Position(j, i)).getColorOfPiece());
-                else
-                    System.out.printf("%11s", " ");
-            }
-            System.out.println("|| " + row + " ||");
-            System.out.println("||   ||           |           |           |           |           |           |           |           ||   ||");
-            row--;
-        }
-        System.out.println("||===||===============================================================================================||===||");
-        System.out.println("||   ||     A     |     B     |     C     |     D     |     E     |     F     |     G     |     H     ||   ||");
-        System.out.println("||===||===============================================================================================||===||");
+        user_interface.showBoard(board);
     }
 
     public void showPiecesTaken() {
-        System.out.print("||====================|");
-        for (Piece piece : black_pieces_taken)
-            System.out.print("|===========");
-        if (black_pieces_taken.size() == 0)
-            System.out.print("|");
-        else
-            System.out.print("||");
-        System.out.print("\n|| BLACK PIECES TAKEN |");
-        for (Piece piece : black_pieces_taken)
-            System.out.printf("| %-10s", piece.getNameOfPiece());
-        if (black_pieces_taken.size() == 0)
-            System.out.print("|");
-        else
-            System.out.print("||");
-        System.out.print("\n||--------------------|");
-        for (Piece piece : black_pieces_taken)
-            System.out.print("|-----------");
-        if (black_pieces_taken.size() == 0)
-            System.out.print("|");
-        else
-            System.out.print("||");
-        System.out.print("\n||--------------------|");
-        for (Piece piece : white_pieces_taken)
-            System.out.print("|-----------");
-        if (white_pieces_taken.size() == 0)
-            System.out.print("|");
-        else
-            System.out.print("||");
-        System.out.print("\n|| WHITE PIECES TAKEN |");
-        for (Piece piece : white_pieces_taken)
-            System.out.printf("| %-10s", piece.getNameOfPiece());
-        if (white_pieces_taken.size() == 0)
-            System.out.print("|");
-        else
-            System.out.print("||");
-        System.out.print("\n||====================|");
-        for (Piece piece : white_pieces_taken)
-            System.out.print("|===========");
-        if (white_pieces_taken.size() == 0)
-            System.out.print("|");
-        else
-            System.out.print("||");
+        user_interface.showPiecesTaken(black_pieces_taken, white_pieces_taken);
     }
 }
