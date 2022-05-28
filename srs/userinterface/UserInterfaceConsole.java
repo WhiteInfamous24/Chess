@@ -25,38 +25,60 @@ public class UserInterfaceConsole implements UserInterface {
         System.out.println("POSICION NO VALIDA");
     }
 
+    public void invalidInputMessage() {
+        System.out.println("ENTRADA NO VALIDA");
+    }
+
     public Position requestFirstPositionMessage() {
-        System.out.print("Pieza a mover: ");
-        String input = new Scanner(System.in).nextLine();
+        String input;
+        boolean valid_input;
+        do {
+            valid_input = true;
+            System.out.print("Pieza a mover: ");
+            input = new Scanner(System.in).nextLine();
+            if (input.length() != 2) {
+                valid_input = false;
+                invalidPositionMessage();
+            }
+        } while (!valid_input);
         return new Position(input.charAt(0)-97, 7-(input.charAt(1)-49));
     }
 
     public Position requestSecondPositionMessage() {
-        System.out.print("Mover a casilla: ");
-        String input = new Scanner(System.in).nextLine();
+        String input;
+        boolean valid_input;
+        do {
+            valid_input = true;
+            System.out.print("Mover a casilla: ");
+            input = new Scanner(System.in).nextLine();
+            if (input.length() != 2) {
+                valid_input = false;
+                invalidPositionMessage();
+            }
+        } while (!valid_input);
         return new Position(input.charAt(0)-97, 7-(input.charAt(1)-49));
     }
 
     public Piece requestToChoosePiece(ColorEnum c) {
         Piece piece;
-        System.out.print("Seleccione una pieza:");
-        System.out.println("\n'1' ----> Bishop");
+        System.out.println("'1' ----> Bishop");
         System.out.println("'2' ----> Knight");
         System.out.println("'3' ----> Rook");
-        System.out.println("'4' ----> Queen\n");
+        System.out.println("'4' ----> Queen");
         System.out.println("(default) Queen\n");
-        char input = new Scanner(System.in).nextLine().charAt(0);
+        System.out.print("Seleccione una pieza: ");
+        String input = new Scanner(System.in).nextLine();
         switch (input) {
-            case '1':
+            case "1":
                 piece = new Bishop(c);
                 break;
-            case '2':
+            case "2":
                 piece = new Knight(c);
                 break;
-            case '3':
+            case "3":
                 piece = new Rook(c);
                 break;
-            case '4':
+            case "4":
                 piece = new Queen(c);
                 break;
             default:
@@ -150,5 +172,10 @@ public class UserInterfaceConsole implements UserInterface {
     public void cleanScreen() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
+    }
+
+    public void insertVoidLine(int n) {
+        for(int i = 0; i < n; i++)
+            System.out.println("");
     }
 }

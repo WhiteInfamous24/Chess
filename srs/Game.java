@@ -34,16 +34,16 @@ public class Game {
     public void askForUserInterface() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
-        System.out.println("Select desired user interface:");
-        System.out.println("\n'1' ----> Console");
-        System.out.println("'2' ----> Windows\n");
+        System.out.println("'1' ----> Console");
+        System.out.println("'2' ----> Windows");
         System.out.println("(default) Console\n");
-        char input = new Scanner(System.in).nextLine().charAt(0);
+        System.out.print("Seleccione interfaz grafica deseada: ");
+        String input = new Scanner(System.in).nextLine();
         switch (input) {
-            case '1':
+            case "1":
                 user_interface = new UserInterfaceConsole();
                 break;
-            case '2':
+            case "2":
                 user_interface = new UserInterfaceWindows();
                 break;
             default:
@@ -87,13 +87,16 @@ public class Game {
         Position position_2;
         position_1 = requestFirstPosition();
         position_2 = requestSecondPosition(position_1);
+        if (board.getPiece(position_1) == null)
+            position_1 = searchKing(player);
         board.movePiece(position_1, position_2);
     }
 
-    private Position requestFirstPosition() {
+    private Position requestFirstPosition() throws IndexOutOfBoundsException {
         Position position;
         boolean valid_position;
         do {
+            valid_position = true;
             position = user_interface.requestFirstPositionMessage();
             try {
                 if (board.getPiece(position) != null)
@@ -110,10 +113,11 @@ public class Game {
         return position;
     }
 
-    private Position requestSecondPosition(Position pos) {
+    private Position requestSecondPosition(Position pos) throws IndexOutOfBoundsException {
         Position position;
         boolean valid_position;
         do {
+            valid_position = true;
             position = user_interface.requestSecondPositionMessage();
             try {
                 if (board.getPiece(position) != null)
@@ -141,7 +145,6 @@ public class Game {
                                 board.movePiece(position, new Position(5, 7));
                                 position = new Position(6, 7);
                             }
-                        valid_position = true;
                     }
                     else if (couldTakeAPiece(pos, position)) {
                         valid_position = isValidMovement(pos, position);
@@ -344,18 +347,19 @@ public class Game {
         return false;
     }
 
-    private boolean thereIsCheck(Position pos_1) {
-        ArrayList<Position> position = new ArrayList<>();
-        position.add(pos_1);
-        return analizeIfItsAttacked(position);
-    }
-
     private Position searchKing(ColorEnum c) {
         for (int i = 0; i < 8; i++)
             for (int j = 0; j < 8; j++)
-                if (board.getPiece(new Position(i, j)).getNameOfPiece().equals(PieceEnum.KING) && board.getPiece(new Position(i, j)).getColorOfPiece().equals(player))
-                    return new Position(i, j);
+                if (board.getPiece(new Position(i, j)) != null)
+                    if (board.getPiece(new Position(i, j)).getNameOfPiece().equals(PieceEnum.KING) && board.getPiece(new Position(i, j)).getColorOfPiece().equals(player))
+                        return new Position(i, j);
         return null;
+    }
+
+    private boolean analizeIfThereIsACheck() {
+        ArrayList<Position> position = new ArrayList<>();
+        position.add(searchKing(player));
+        return analizeIfItsAttacked(position);
     }
 
     public void analizePawnPromotion() {
@@ -415,5 +419,9 @@ public class Game {
 
     public void showPiecesTaken() {
         user_interface.showPiecesTaken(black_pieces_taken, white_pieces_taken);
+    }
+
+    public void insertVoidLine(int n) {
+        user_interface.insertVoidLine(n);
     }
 }

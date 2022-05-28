@@ -24,6 +24,10 @@ public class UserInterfaceWindows implements UserInterface {
 
     }
 
+    public void invalidInputMessage() {
+        
+    }
+
     public Position requestFirstPositionMessage() {
         return new Position(0, 0);
     }
@@ -46,5 +50,9 @@ public class UserInterfaceWindows implements UserInterface {
 
     public void cleanScreen() {
 
+    }
+
+    public void insertVoidLine(int n) {
+        
     }
 }
