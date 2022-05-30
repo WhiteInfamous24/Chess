@@ -38,7 +38,7 @@ public abstract class Piece {
         return was_moved;
     }
 
-    public final void setWasMoved() {
-        was_moved = true;
+    public final void setWasMoved(boolean b) {
+        was_moved = b;
     }
 }

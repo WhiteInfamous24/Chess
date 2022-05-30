@@ -23,6 +23,12 @@ public class Board {
         board[pos_2.getX()][pos_2.getY()] = board[pos_1.getX()][pos_1.getY()];
         board[pos_1.getX()][pos_1.getY()] = null;
         if (!board[pos_2.getX()][pos_2.getY()].getWasMoved())
-            board[pos_2.getX()][pos_2.getY()].setWasMoved();
+            board[pos_2.getX()][pos_2.getY()].setWasMoved(true);
+    }
+
+    public void undoMovement(Position pos_1, Position pos_2, boolean b) {
+        board[pos_2.getX()][pos_2.getY()] = board[pos_1.getX()][pos_1.getY()];
+        board[pos_1.getX()][pos_1.getY()] = null;
+        board[pos_2.getX()][pos_2.getY()].setWasMoved(b);
     }
 }

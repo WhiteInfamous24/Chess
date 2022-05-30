@@ -21,6 +21,7 @@ public class Game {
     private ColorEnum player;
     private ArrayList<Piece> black_pieces_taken;
     private ArrayList<Piece> white_pieces_taken;
+    private ArrayList<Movement> movements;
     private UserInterface user_interface;
 
     public Game() {
@@ -28,6 +29,7 @@ public class Game {
         player = ColorEnum.WHITE;
         black_pieces_taken = new ArrayList<>();
         white_pieces_taken = new ArrayList<>();
+        movements = new ArrayList<>();
         askForUserInterface();
     }
 
@@ -85,11 +87,25 @@ public class Game {
     public void movePiece() throws IndexOutOfBoundsException {
         Position position_1;
         Position position_2;
-        position_1 = requestFirstPosition();
-        position_2 = requestSecondPosition(position_1);
-        if (board.getPiece(position_1) == null)
-            position_1 = searchKing(player);
-        board.movePiece(position_1, position_2);
+        boolean there_is_check;
+        do {
+            position_1 = requestFirstPosition();
+            position_2 = requestSecondPosition(position_1);
+            if (board.getPiece(position_1) == null) //si "pos_1" es "null" significa que se realizo un enrroque y se selecciono la torre primero
+                position_1 = searchKing(player);
+            movements.add(new Movement(position_1, position_2, board.getPiece(position_1).getWasMoved()));
+            board.movePiece(position_1, position_2);
+            there_is_check = thereIsCheck();
+            if(there_is_check) {
+                user_interface.stillInCheckMessage();
+                returnMovementBackwards();
+            }
+        } while (there_is_check);
+    }
+
+    public void returnMovementBackwards() {
+        board.undoMovement(movements.get(movements.size()-1).getPosition2(), movements.get(movements.size()-1).getPosition1(), movements.get(movements.size()-1).getWasMovedOld());
+        movements.remove(movements.size()-1);
     }
 
     private Position requestFirstPosition() throws IndexOutOfBoundsException {
@@ -99,14 +115,8 @@ public class Game {
             valid_position = true;
             position = user_interface.requestFirstPositionMessage();
             try {
-                if (board.getPiece(position) != null) 
-                    if (thereIsCheck())
-                        if (searchPositionInArray(notAttackedPositionsInCheck(searchKing(player)), position))
-                            valid_position = board.getPiece(position).getColorOfPiece().equals(player);
-                        else
-                            valid_position = false;
-                    else
-                        valid_position = board.getPiece(position).getColorOfPiece().equals(player);
+                if (board.getPiece(position) != null)
+                    valid_position = board.getPiece(position).getColorOfPiece().equals(player);
                 else
                     valid_position = false;
             } catch (IndexOutOfBoundsException e) {
@@ -303,10 +313,10 @@ public class Game {
     }
 
     /*
-    ni el rey ni la torre deben haber sido movidas,
-    el rey no puede estar en jaque,
-    ninguna casilla de la trayectoria que recorrera el rey puede estar atacada,
-    no deben haber piezas en entre el rey y la torre,
+    -ni el rey ni la torre deben haber sido movidas,
+    -el rey no puede estar en jaque,
+    -ninguna casilla de la trayectoria que recorrera el rey puede estar atacada,
+    -no deben haber piezas entre el rey y la torre,
     el enrroque es moviendo el rey 2 casillas hacia la derecha o izquierda, y la torre, del lado al que se movio, salta sobre el rey
     */
     private boolean couldMakeCastling(Position pos_1, Position pos_2) {
@@ -376,8 +386,20 @@ public class Game {
     }
 
     public boolean thereIsCheckmate() {
-        if (thereIsCheck() && notAttackedPositionsInCheck(searchKing(player)).size() == 0)
-            return true;
+        if (thereIsCheck()) {
+            ArrayList<Position> tentative_movements = notAttackedPositionsInCheck(searchKing(player));
+            ArrayList<Position> to_remove = new ArrayList<>();
+            for (Position position : tentative_movements)
+                if (board.getPiece(position) != null)
+                    if (board.getPiece(position).getColorOfPiece().equals(player))
+                        to_remove.add(position);
+                    else
+                        if (itsAttacked(position))
+                            to_remove.add(position);
+            tentative_movements.removeAll(to_remove);
+            if (tentative_movements.size() == 0)
+                return true;
+        }
         return false;
     }
 
@@ -454,6 +476,10 @@ public class Game {
             user_interface.checkMessage();
             user_interface.insertVoidLine(1);
         }
+    }
+
+    public void winnerMessage() {
+        user_interface.winnerMessage(player);
     }
 
     public void showBoard() {

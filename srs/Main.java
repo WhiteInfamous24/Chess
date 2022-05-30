@@ -26,5 +26,12 @@ public class Main {
             game.showPiecesTaken();
             game.changePlayer();
         }
+        game.changePlayer();
+        game.getUserInterface().cleanScreen();
+        game.showBoard();
+        game.insertVoidLine(1);
+        game.showPiecesTaken();
+        game.insertVoidLine(2);
+        game.winnerMessage();
     }
 }
