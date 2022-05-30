@@ -99,8 +99,14 @@ public class Game {
             valid_position = true;
             position = user_interface.requestFirstPositionMessage();
             try {
-                if (board.getPiece(position) != null)
-                    valid_position = board.getPiece(position).getColorOfPiece().equals(player);
+                if (board.getPiece(position) != null) 
+                    if (thereIsCheck())
+                        if (searchPositionInArray(notAttackedPositionsInCheck(searchKing(player)), position))
+                            valid_position = board.getPiece(position).getColorOfPiece().equals(player);
+                        else
+                            valid_position = false;
+                    else
+                        valid_position = board.getPiece(position).getColorOfPiece().equals(player);
                 else
                     valid_position = false;
             } catch (IndexOutOfBoundsException e) {
@@ -341,7 +347,7 @@ public class Game {
                                 positions.add(new Position(5, 7));
                                 positions.add(new Position(6, 7));
                             }
-                        return !analizeIfItsAttacked(positions);
+                        return !itsAttacked(positions);
                     }
         }
         return false;
@@ -356,10 +362,23 @@ public class Game {
         return null;
     }
 
-    private boolean analizeIfThereIsACheck() {
-        ArrayList<Position> position = new ArrayList<>();
-        position.add(searchKing(player));
-        return analizeIfItsAttacked(position);
+    private boolean thereIsCheck() {
+        return itsAttacked(searchKing(player));
+    }
+
+    private ArrayList<Position> notAttackedPositionsInCheck(Position pos) {
+        ArrayList<Position> output = new ArrayList<>();
+        ArrayList<Position> around_positions = board.getPiece(pos).possibleMovements(pos);
+        for (Position position : around_positions)
+            if (!itsAttacked(position))
+                output.add(position);
+        return output;
+    }
+
+    public boolean thereIsCheckmate() {
+        if (thereIsCheck() && notAttackedPositionsInCheck(searchKing(player)).size() == 0)
+            return true;
+        return false;
     }
 
     public void analizePawnPromotion() {
@@ -378,31 +397,48 @@ public class Game {
             board.setPiece(user_interface.requestToChoosePiece(player), position);
     }
 
-    private boolean analizeIfItsAttacked(ArrayList<Position> pos) {
+    private boolean itsAttacked(Position pos) {
         ColorEnum player_aux;
         ArrayList<Position> positions = new ArrayList<>();
         if (player.equals(ColorEnum.BLACK))
             player_aux = ColorEnum.WHITE;
         else
             player_aux = ColorEnum.BLACK;
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 8; i++) //cargo todas las piezas rivales del tablero
             for (int j = 0; j < 8; j++)
                 if (board.getPiece(new Position(i, j)) != null)
                     if (board.getPiece(new Position(i, j)).getColorOfPiece().equals(player_aux))
                         positions.add(new Position(i, j));
         for (Position rival_position : positions) //analizo los movimientos de todas las fichas enemigas recopiladas y debo corroborar si atacan las posiciones pasadas por parametro
+            if (isValidMovement(rival_position, pos))
+                return true;
+        return false;
+    }
+
+    private boolean itsAttacked(ArrayList<Position> pos) {
+        ColorEnum player_aux;
+        ArrayList<Position> positions = new ArrayList<>();
+        if (player.equals(ColorEnum.BLACK))
+            player_aux = ColorEnum.WHITE;
+        else
+            player_aux = ColorEnum.BLACK;
+        for (int i = 0; i < 8; i++) //cargo todas las piezas rivales del tablero
+            for (int j = 0; j < 8; j++)
+                if (board.getPiece(new Position(i, j)) != null)
+                    if (board.getPiece(new Position(i, j)).getColorOfPiece().equals(player_aux))
+                        positions.add(new Position(i, j));
+        for (Position rival_piece : positions) //analizo los movimientos de todas las fichas enemigas recopiladas y debo corroborar si atacan las posiciones pasadas por parametro
             for (Position position_to_analize : pos)
-                if (isValidMovement(rival_position, position_to_analize))
+                if (isValidMovement(rival_piece, position_to_analize))
                     return true;
         return false;
     }
 
     private boolean searchPositionInArray(ArrayList<Position> array_pos, Position pos) {
-        boolean output = false;
         for (Position position : array_pos)
             if (position.getX() == pos.getX() && position.getY() == pos.getY())
-                output = true;
-        return output;
+                return true;
+        return false;
     }
 
     public UserInterface getUserInterface() {
@@ -411,6 +447,13 @@ public class Game {
 
     public void playerTurnMessage() {
         user_interface.playerTurnMessage(player);
+    }
+
+    public void showIfThereIsCheck() {
+        if (thereIsCheck()) {
+            user_interface.checkMessage();
+            user_interface.insertVoidLine(1);
+        }
     }
 
     public void showBoard() {

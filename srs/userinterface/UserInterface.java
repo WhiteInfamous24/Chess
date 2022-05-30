@@ -9,6 +9,7 @@ import srs.pieces.Piece;
 
 public interface UserInterface {
     public abstract void playerTurnMessage(ColorEnum c);
+    public abstract void checkMessage();
     public abstract void invalidPositionMessage();
     public abstract void invalidInputMessage();
     public abstract Position requestFirstPositionMessage();

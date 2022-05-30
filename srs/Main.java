@@ -8,10 +8,11 @@ public class Main {
         game.showBoard();
         game.insertVoidLine(1);
         game.showPiecesTaken();
-        while (true) {
+        while (!game.thereIsCheckmate()) {
             game.insertVoidLine(2);
             game.playerTurnMessage();
             game.insertVoidLine(1);
+            game.showIfThereIsCheck();
             game.movePiece();
             game.getUserInterface().cleanScreen();
             game.showBoard();

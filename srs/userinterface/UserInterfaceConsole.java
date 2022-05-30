@@ -21,6 +21,10 @@ public class UserInterfaceConsole implements UserInterface {
         System.out.println("TURNO DE " + c);
     }
 
+    public void checkMessage() {
+        System.out.println("HAY JAQUE AL REY");
+    }
+
     public void invalidPositionMessage() {
         System.out.println("POSICION NO VALIDA");
     }

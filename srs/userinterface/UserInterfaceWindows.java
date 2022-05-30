@@ -20,6 +20,10 @@ public class UserInterfaceWindows implements UserInterface {
 
     }
 
+    public void checkMessage() {
+        
+    }
+
     public void invalidPositionMessage() {
 
     }
