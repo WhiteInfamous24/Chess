@@ -33,5 +33,6 @@ public class Main {
         game.showPiecesTaken();
         game.insertVoidLine(2);
         game.winnerMessage();
+        game.insertVoidLine(1);
     }
 }

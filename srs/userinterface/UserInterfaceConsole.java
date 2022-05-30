@@ -30,10 +30,10 @@ public class UserInterfaceConsole implements UserInterface {
     }
 
     public void winnerMessage(ColorEnum c) {
-        System.out.println("|----------------------|");
-        System.out.println("| HAY JAQUEMATE AL REY |");
-        System.out.println("|    GANADOR: " + c + "    |");
-        System.out.println("|----------------------|");
+        System.out.println("||======================||");
+        System.out.println("|| HAY JAQUEMATE AL REY ||");
+        System.out.println("||    GANADOR: " + c + "    ||");
+        System.out.println("||======================||");
     }
 
     public void invalidPositionMessage() {

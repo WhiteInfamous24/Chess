@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 import srs.enums.ColorEnum;
 import srs.enums.PieceEnum;
+import srs.exception.InvalidPositionException;
 import srs.pieces.Bishop;
 import srs.pieces.King;
 import srs.pieces.Knight;
@@ -24,6 +25,9 @@ public class Game {
     private ArrayList<Movement> movements;
     private UserInterface user_interface;
 
+    /*
+    constructor de la clase
+    */
     public Game() {
         board = new Board();
         player = ColorEnum.WHITE;
@@ -33,6 +37,10 @@ public class Game {
         askForUserInterface();
     }
 
+    /*
+    pide por consola al usuario que ingrese que metodo de visualizacion quiere ejecutar,
+    luego instancia la "user_interface" en "console" o en "windows"
+    */
     public void askForUserInterface() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
@@ -54,6 +62,9 @@ public class Game {
         }
     }
 
+    /*
+    inicializa todas las piezas de ajebrez en sus posiciones
+    */
     public void initializePieces() {
         for (int i = 0; i < 8; i++) {
             board.setPiece(new Pawn(ColorEnum.BLACK), new Position(i, 1));
@@ -77,6 +88,9 @@ public class Game {
         board.setPiece(new King(ColorEnum.WHITE), new Position(4, 7));
     }
 
+    /*
+    alterna entre jugador de color "white" y "black"
+    */
     public void changePlayer() {
         if (player.equals(ColorEnum.WHITE))
             player = ColorEnum.BLACK;
@@ -84,112 +98,142 @@ public class Game {
             player = ColorEnum.WHITE;
     }
 
-    public void movePiece() throws IndexOutOfBoundsException {
-        Position position_1;
-        Position position_2;
-        boolean there_is_check;
+    /*
+    pide al usuario que ingrese 2 posiciones del tablero y luego ejecuta los movimientos pedidos solo en el caso de cumplir con los requisitos,
+    en caso de no cumplir se volveran a pedir 2 posiciones del tablero
+    */
+    public void movePiece() {
+        Position position_1 = null;
+        Position position_2 = null;
         do {
-            position_1 = requestFirstPosition();
-            position_2 = requestSecondPosition(position_1);
-            if (board.getPiece(position_1) == null) //si "pos_1" es "null" significa que se realizo un enrroque y se selecciono la torre primero
-                position_1 = searchKing(player);
-            movements.add(new Movement(position_1, position_2, board.getPiece(position_1).getWasMoved()));
-            board.movePiece(position_1, position_2);
-            there_is_check = thereIsCheck();
-            if(there_is_check) {
-                user_interface.stillInCheckMessage();
-                returnMovementBackwards();
+            try {
+                position_1 = requestFirstPosition();
+                position_2 = requestSecondPosition(position_1); //sera "null" si no puede comer, o no puede hacer enroque, o el movimiento no lo permite la pieza
+            } catch (InvalidPositionException e) {
+                System.out.println("-InvalidPositionException-");
+            } catch (IndexOutOfBoundsException e) {
+                System.out.println("-IndexOutOfBoundsException-");
             }
-        } while (there_is_check);
+            if (position_1 != null && position_2 != null) {
+                if (board.getPiece(position_1) == null) //si no la pieza 1 del tablero es "null" significa que se realizo un enrroque y se selecciono la torre primero
+                    position_1 = searchKing(player);
+                if (position_2 != null) {
+                    movements.add(new Movement(position_1, position_2, board.getPiece(position_1).getWasMoved()));
+                    board.movePiece(position_1, position_2);
+                }
+                if (thereIsCheck()) {
+                    user_interface.stillInCheckMessage();
+                    returnMovementBackwards();
+                }
+            }
+            else
+                user_interface.invalidPositionMessage();
+        } while (position_1 == null || position_2 == null || thereIsCheck());
     }
 
+    /*
+    deshace el ultimo movimiento que se ejecuto en la partida
+    */
     public void returnMovementBackwards() {
         board.undoMovement(movements.get(movements.size()-1).getPosition2(), movements.get(movements.size()-1).getPosition1(), movements.get(movements.size()-1).getWasMovedOld());
         movements.remove(movements.size()-1);
     }
 
-    private Position requestFirstPosition() throws IndexOutOfBoundsException {
-        Position position;
-        boolean valid_position;
-        do {
-            valid_position = true;
-            position = user_interface.requestFirstPositionMessage();
-            try {
-                if (board.getPiece(position) != null)
-                    valid_position = board.getPiece(position).getColorOfPiece().equals(player);
-                else
-                    valid_position = false;
-            } catch (IndexOutOfBoundsException e) {
-                System.out.println("-IndexOutOfBoundsException-");
-                valid_position = false;
+    /*
+    pide por interfaz de usuario que se le ingrese una posicion del tablero que indique una pieza propia que sera la pieza a mover
+    puede arrojar excepcion por:
+    -ser una posicion fuera de los limites del tablero
+    -por no haber elegido una pieza propia
+    -haber elegido una casilla vacia
+    */
+    private Position requestFirstPosition() throws IndexOutOfBoundsException, InvalidPositionException {
+        Position position = user_interface.requestFirstPositionMessage();
+        try {
+            if (board.getPiece(position) != null) {
+                if (!board.getPiece(position).getColorOfPiece().equals(player))
+                    throw new InvalidPositionException();
             }
-            if (!valid_position)
-                user_interface.invalidPositionMessage();
-        } while (!valid_position);
+            else
+                throw new InvalidPositionException();
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("-IndexOutOfBoundsException-");
+        }
         return position;
     }
 
-    private Position requestSecondPosition(Position pos) throws IndexOutOfBoundsException {
-        Position position;
-        boolean valid_position;
-        do {
-            valid_position = true;
-            position = user_interface.requestSecondPositionMessage();
-            try {
-                if (board.getPiece(position) != null)
-                    if (couldMakeCastling(pos, position)) {
-                        if (board.getPiece(pos).getNameOfPiece().equals(PieceEnum.ROOK)) {
-                            Position aux = pos;
-                            pos = position;
-                            position = aux;
+    /*
+    pide por interfaz de usuario que se le ingrese una posicion del tablero que sera la posicion a mover la pieza seleccionada anteriormente
+    o en caso de que sea otra pieza se analiza si es propia para realizar enroque de torre y rey, o si es rival se analiza si se puede comer
+    puede arrojar excepcion por:
+    -elegir una posicion vacia y la pieza seleccionada anteriormente no pueda realizar esa trayectoria
+    -no se seleccionaron 2 piezas propias que cumplan con los requisitos para realizar el enroque de torre y rey
+    -se selecciono una posicion con una pieza enemiga, pero la pieza propia no puede realizar una trayectoria permitida para comerla
+    */
+    private Position requestSecondPosition(Position pos) throws IndexOutOfBoundsException, InvalidPositionException {
+        Position position = user_interface.requestSecondPositionMessage();
+        try {
+            if (board.getPiece(position) != null)
+                if (couldMakeCastling(pos, position)) {
+                    if (board.getPiece(pos).getNameOfPiece().equals(PieceEnum.ROOK)) {
+                        Position aux = pos;
+                        pos = position;
+                        position = aux;
+                    }
+                    if (position.getX() == 0)
+                        if (player.equals(ColorEnum.BLACK)) {
+                            movements.add(new Movement(position, new Position(2, 0), board.getPiece(position).getWasMoved()));
+                            board.movePiece(position, new Position(2, 0));
+                            position = new Position(1, 0);
                         }
-                        if (position.getX() == 0)
-                            if (player.equals(ColorEnum.BLACK)) {
-                                board.movePiece(position, new Position(2, 0));
-                                position = new Position(1, 0);
-                            }
-                            else {
-                                board.movePiece(position, new Position(3, 7));
-                                position = new Position(2, 7);
-                            }
-                        else
-                            if (player.equals(ColorEnum.BLACK)) {
-                                board.movePiece(position, new Position(4, 0));
-                                position = new Position(5, 0);
-                            }
-                            else {
-                                board.movePiece(position, new Position(5, 7));
-                                position = new Position(6, 7);
-                            }
-                    }
-                    else if (couldTakeAPiece(pos, position)) {
-                        valid_position = isValidMovement(pos, position);
-                        if (valid_position)
-                            if (player.equals(ColorEnum.BLACK))
-                                white_pieces_taken.add(board.getPiece(position));
-                            else
-                                black_pieces_taken.add(board.getPiece(position));
-                    }
+                        else {
+                            movements.add(new Movement(position, new Position(3, 7), board.getPiece(position).getWasMoved()));
+                            board.movePiece(position, new Position(3, 7));
+                            position = new Position(2, 7);
+                        }
                     else
-                        valid_position = false;
+                        if (player.equals(ColorEnum.BLACK)) {
+                            movements.add(new Movement(position, new Position(4, 0), board.getPiece(position).getWasMoved()));
+                            board.movePiece(position, new Position(4, 0));
+                            position = new Position(5, 0);
+                        }
+                        else {
+                            movements.add(new Movement(position, new Position(5, 7), board.getPiece(position).getWasMoved()));
+                            board.movePiece(position, new Position(5, 7));
+                            position = new Position(6, 7);
+                        }
+                }
+                else if (couldTakeAPiece(pos, position)) {
+                    if (isValidMovement(pos, position))
+                        if (player.equals(ColorEnum.BLACK))
+                            white_pieces_taken.add(board.getPiece(position));
+                        else
+                            black_pieces_taken.add(board.getPiece(position));
+                    else
+                        throw new InvalidPositionException();
+                }
                 else
-                    valid_position = isValidMovement(pos, position);
-            } catch (IndexOutOfBoundsException e) {
-                System.out.println("-IndexOutOfBoundsException-");
-                valid_position = false;
-            }
-            if (!valid_position)
-                user_interface.invalidPositionMessage();
-        } while (!valid_position);
+                    throw new InvalidPositionException();
+            else if (!isValidMovement(pos, position))
+                throw new InvalidPositionException();
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("-IndexOutOfBoundsException-");
+            throw new InvalidPositionException();
+        }
         return position;
     }
 
+    /*
+    analiza si el movimiento que se desea realizar cumple con los posibles requisitos
+    -en caso de que la posicion final sea valida para tomar una pieza rival, y efectivamente haya una pieza para poder tomar,
+    se procede a verificar que en la trayectoria no haya obstaculos y si cumple, se captura la pieza
+    -en caso de que la posicion final se encuentre vacia, se procede a verificar que no haya obstaculos en el camino
+    */
     private boolean isValidMovement(Position pos_1, Position pos_2) {
         ArrayList<Position> possible_movements = board.getPiece(pos_1).possibleMovements(pos_1);
         ArrayList<Position> possible_takes = board.getPiece(pos_1).possibleTakes(pos_1);
         if (searchPositionInArray(possible_takes, pos_2) && board.getPiece(pos_2) != null) //veo si la posicion final se encuentra en una posicion de toma valido de la pieza
             return analizeTrajectory(pos_1, pos_2);
-        else if (searchPositionInArray(possible_movements, pos_2)) //veo si la posicion final se encuentra en una posicion de movimiento valido de la pieza
+        else if (searchPositionInArray(possible_movements, pos_2) && board.getPiece(pos_2) == null) //veo si la posicion final se encuentra en una posicion de movimiento valido de la pieza
             return analizeTrajectory(pos_1, pos_2);
         else
             return false;
@@ -363,6 +407,9 @@ public class Game {
         return false;
     }
 
+    /*
+    retorna la posicion del rey del jugador que fue pasado por argumento del metodo
+    */
     private Position searchKing(ColorEnum c) {
         for (int i = 0; i < 8; i++)
             for (int j = 0; j < 8; j++)
@@ -376,6 +423,9 @@ public class Game {
         return itsAttacked(searchKing(player));
     }
 
+    /*
+    se le pasa una posicion que debe ser la del rey, y retorna un arraylist con las posiciones que no se ven atacadas alrrededor del rey
+    */
     private ArrayList<Position> notAttackedPositionsInCheck(Position pos) {
         ArrayList<Position> output = new ArrayList<>();
         ArrayList<Position> around_positions = board.getPiece(pos).possibleMovements(pos);
@@ -385,6 +435,10 @@ public class Game {
         return output;
     }
 
+    /*
+    analiza si el rey se ve acorralado, viendo si en caso de haber jaque, el rey tiene movimientos posibles,
+    incluso en el caso de que pueda llegar a comer una pieza rival
+    */
     public boolean thereIsCheckmate() {
         if (thereIsCheck()) {
             ArrayList<Position> tentative_movements = notAttackedPositionsInCheck(searchKing(player));
@@ -403,6 +457,11 @@ public class Game {
         return false;
     }
 
+    /*
+    analiza si existen peones que hayan completado todo su recorrido y, en caso de haber,
+    se pide por interfaz de usuario que se elija en que pieza desea que se convierta,
+    para luego ser reemplazada en el tablero
+    */
     public void analizePawnPromotion() {
         Position position = null;
         for (int i = 0; i < 8; i++) {
@@ -419,6 +478,10 @@ public class Game {
             board.setPiece(user_interface.requestToChoosePiece(player), position);
     }
 
+    /*
+    se le pasa una posicion por argumento y devuelve un booleano en el caso de
+    que esa posicion se vea atacada por alguna pieza enemiga
+    */
     private boolean itsAttacked(Position pos) {
         ColorEnum player_aux;
         ArrayList<Position> positions = new ArrayList<>();
@@ -437,25 +500,34 @@ public class Game {
         return false;
     }
 
+    /*
+    se le pasa un arraylist de posiciones por argumento y devuelve un booleano en el caso de
+    que alguna de esas posiciones se vea atacada po alguna pieza enemiga
+    */
     private boolean itsAttacked(ArrayList<Position> pos) {
-        ColorEnum player_aux;
+        ColorEnum opponent;
         ArrayList<Position> positions = new ArrayList<>();
         if (player.equals(ColorEnum.BLACK))
-            player_aux = ColorEnum.WHITE;
+            opponent = ColorEnum.WHITE;
         else
-            player_aux = ColorEnum.BLACK;
+            opponent = ColorEnum.BLACK;
         for (int i = 0; i < 8; i++) //cargo todas las piezas rivales del tablero
             for (int j = 0; j < 8; j++)
                 if (board.getPiece(new Position(i, j)) != null)
-                    if (board.getPiece(new Position(i, j)).getColorOfPiece().equals(player_aux))
+                    if (board.getPiece(new Position(i, j)).getColorOfPiece().equals(opponent))
                         positions.add(new Position(i, j));
-        for (Position rival_piece : positions) //analizo los movimientos de todas las fichas enemigas recopiladas y debo corroborar si atacan las posiciones pasadas por parametro
-            for (Position position_to_analize : pos)
+        for (Position position_to_analize : pos) //analizo los movimientos de todas las fichas enemigas recopiladas y debo corroborar si atacan las posiciones pasadas por parametro
+            for (Position rival_piece : positions)
                 if (isValidMovement(rival_piece, position_to_analize))
                     return true;
         return false;
     }
 
+    /*
+    se le pasa por argumento un arraylist de posiciones y una posicion, y el metodo retornara un booleano
+    en el caso de que exista, o no, alguna posicion en el arraylist con las mismas coordenadas que la posicion
+    que se paso por argumento de la funcion
+    */
     private boolean searchPositionInArray(ArrayList<Position> array_pos, Position pos) {
         for (Position position : array_pos)
             if (position.getX() == pos.getX() && position.getY() == pos.getY())
