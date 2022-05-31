@@ -40,37 +40,23 @@ public class UserInterfaceConsole implements UserInterface {
         System.out.println("POSICION NO VALIDA");
     }
 
+    public void invalidMovementMessage() {
+        System.out.println("MOVIMIENTO NO VALIDO");
+    }
+
     public void invalidInputMessage() {
         System.out.println("ENTRADA NO VALIDA");
     }
 
     public Position requestFirstPositionMessage() {
-        String input;
-        boolean valid_input;
-        do {
-            valid_input = true;
-            System.out.print("Pieza a mover: ");
-            input = new Scanner(System.in).nextLine();
-            if (input.length() != 2) {
-                valid_input = false;
-                invalidPositionMessage();
-            }
-        } while (!valid_input);
+        System.out.print("Pieza a mover: ");
+        String input = new Scanner(System.in).nextLine();
         return new Position(input.charAt(0)-97, 7-(input.charAt(1)-49));
     }
 
     public Position requestSecondPositionMessage() {
-        String input;
-        boolean valid_input;
-        do {
-            valid_input = true;
-            System.out.print("Mover a casilla: ");
-            input = new Scanner(System.in).nextLine();
-            if (input.length() != 2) {
-                valid_input = false;
-                invalidPositionMessage();
-            }
-        } while (!valid_input);
+        System.out.print("Mover a casilla: ");
+        String input = new Scanner(System.in).nextLine();
         return new Position(input.charAt(0)-97, 7-(input.charAt(1)-49));
     }
 

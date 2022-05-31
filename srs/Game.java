@@ -98,44 +98,79 @@ public class Game {
             player = ColorEnum.WHITE;
     }
 
-    /*
-    pide al usuario que ingrese 2 posiciones del tablero y luego ejecuta los movimientos pedidos solo en el caso de cumplir con los requisitos,
-    en caso de no cumplir se volveran a pedir 2 posiciones del tablero
-    */
     public void movePiece() {
+        boolean take_piece;
+        boolean valid_movement;
+        do {
+            take_piece = false;
+            valid_movement = false;
+            Movement movement = requestMovement();
+            Position position_1 = movement.getPosition1();
+            Position position_2 = movement.getPosition2();
+            if (board.getPiece(position_2) != null) {
+                if (couldMakeCastling(position_1, position_2)) {
+                    makeCastling(position_1, position_2);
+                    valid_movement = true;
+                }
+                else if (couldTakeAPiece(position_1, position_2)) {
+                    if (player.equals(ColorEnum.BLACK))
+                        white_pieces_taken.add(board.getPiece(position_2));
+                    else
+                        black_pieces_taken.add(board.getPiece(position_2));
+                    movements.add(movement);
+                    board.movePiece(position_1, position_2);
+                    take_piece = true;
+                    valid_movement = true;
+                }
+            }
+            else if (isValidMovement(position_1, position_2)) {
+                movements.add(movement);
+                board.movePiece(position_1, position_2);
+                valid_movement = true;
+            }
+            if (thereIsCheck()) {
+                user_interface.stillInCheckMessage();
+                returnMovementBackwards();
+                valid_movement = false;
+            }
+            if (!valid_movement) {
+                user_interface.invalidMovementMessage();
+                if (take_piece)
+                    if (player.equals(ColorEnum.BLACK))
+                        white_pieces_taken.remove(white_pieces_taken.size()-1);
+                    else
+                        black_pieces_taken.remove(black_pieces_taken.size()-1);
+            }
+        } while (!valid_movement);
+    }
+
+    /*
+    pide al usuario que ingrese 2 posiciones del tablero, y en caso de no cumplir, se volveran a pedir 2 posiciones nuevamente
+    */
+    private Movement requestMovement() {
         Position position_1 = null;
         Position position_2 = null;
         do {
             try {
                 position_1 = requestFirstPosition();
-                position_2 = requestSecondPosition(position_1); //sera "null" si no puede comer, o no puede hacer enroque, o el movimiento no lo permite la pieza
+                position_2 = requestSecondPosition();
             } catch (InvalidPositionException e) {
-                System.out.println("-InvalidPositionException-");
-            } catch (IndexOutOfBoundsException e) {
-                System.out.println("-IndexOutOfBoundsException-");
-            }
-            if (position_1 != null && position_2 != null) {
-                if (board.getPiece(position_1) == null) //si no la pieza 1 del tablero es "null" significa que se realizo un enrroque y se selecciono la torre primero
-                    position_1 = searchKing(player);
-                if (position_2 != null) {
-                    movements.add(new Movement(position_1, position_2, board.getPiece(position_1).getWasMoved()));
-                    board.movePiece(position_1, position_2);
-                }
-                if (thereIsCheck()) {
-                    user_interface.stillInCheckMessage();
-                    returnMovementBackwards();
-                }
-            }
-            else
+                //System.out.println("-InvalidPositionException-");
                 user_interface.invalidPositionMessage();
-        } while (position_1 == null || position_2 == null || thereIsCheck());
+            } catch (IndexOutOfBoundsException e) {
+                //System.out.println("-IndexOutOfBoundsException-");
+                user_interface.invalidPositionMessage();
+            }
+        } while (position_1 == null || position_2 == null);
+        return new Movement(position_1, position_2, board.getPiece(position_1).getWasMoved());
     }
 
     /*
     deshace el ultimo movimiento que se ejecuto en la partida
     */
     public void returnMovementBackwards() {
-        board.undoMovement(movements.get(movements.size()-1).getPosition2(), movements.get(movements.size()-1).getPosition1(), movements.get(movements.size()-1).getWasMovedOld());
+        Movement movement = movements.get(movements.size()-1);
+        board.undoMovement(movement.getPosition2(), movement.getPosition1(), movement.getWasMovedOld());
         movements.remove(movements.size()-1);
     }
 
@@ -148,16 +183,12 @@ public class Game {
     */
     private Position requestFirstPosition() throws IndexOutOfBoundsException, InvalidPositionException {
         Position position = user_interface.requestFirstPositionMessage();
-        try {
-            if (board.getPiece(position) != null) {
-                if (!board.getPiece(position).getColorOfPiece().equals(player))
-                    throw new InvalidPositionException();
-            }
-            else
+        if (board.getPiece(position) != null) {
+            if (!board.getPiece(position).getColorOfPiece().equals(player))
                 throw new InvalidPositionException();
-        } catch (IndexOutOfBoundsException e) {
-            System.out.println("-IndexOutOfBoundsException-");
         }
+        else
+            throw new InvalidPositionException();
         return position;
     }
 
@@ -169,57 +200,46 @@ public class Game {
     -no se seleccionaron 2 piezas propias que cumplan con los requisitos para realizar el enroque de torre y rey
     -se selecciono una posicion con una pieza enemiga, pero la pieza propia no puede realizar una trayectoria permitida para comerla
     */
-    private Position requestSecondPosition(Position pos) throws IndexOutOfBoundsException, InvalidPositionException {
+    private Position requestSecondPosition() {
         Position position = user_interface.requestSecondPositionMessage();
-        try {
-            if (board.getPiece(position) != null)
-                if (couldMakeCastling(pos, position)) {
-                    if (board.getPiece(pos).getNameOfPiece().equals(PieceEnum.ROOK)) {
-                        Position aux = pos;
-                        pos = position;
-                        position = aux;
-                    }
-                    if (position.getX() == 0)
-                        if (player.equals(ColorEnum.BLACK)) {
-                            movements.add(new Movement(position, new Position(2, 0), board.getPiece(position).getWasMoved()));
-                            board.movePiece(position, new Position(2, 0));
-                            position = new Position(1, 0);
-                        }
-                        else {
-                            movements.add(new Movement(position, new Position(3, 7), board.getPiece(position).getWasMoved()));
-                            board.movePiece(position, new Position(3, 7));
-                            position = new Position(2, 7);
-                        }
-                    else
-                        if (player.equals(ColorEnum.BLACK)) {
-                            movements.add(new Movement(position, new Position(4, 0), board.getPiece(position).getWasMoved()));
-                            board.movePiece(position, new Position(4, 0));
-                            position = new Position(5, 0);
-                        }
-                        else {
-                            movements.add(new Movement(position, new Position(5, 7), board.getPiece(position).getWasMoved()));
-                            board.movePiece(position, new Position(5, 7));
-                            position = new Position(6, 7);
-                        }
-                }
-                else if (couldTakeAPiece(pos, position)) {
-                    if (isValidMovement(pos, position))
-                        if (player.equals(ColorEnum.BLACK))
-                            white_pieces_taken.add(board.getPiece(position));
-                        else
-                            black_pieces_taken.add(board.getPiece(position));
-                    else
-                        throw new InvalidPositionException();
-                }
-                else
-                    throw new InvalidPositionException();
-            else if (!isValidMovement(pos, position))
-                throw new InvalidPositionException();
-        } catch (IndexOutOfBoundsException e) {
-            System.out.println("-IndexOutOfBoundsException-");
-            throw new InvalidPositionException();
-        }
+        board.getPiece(position); //linea para corroborar que la posicion entra en el tablero o que tire excepcion
         return position;
+    }
+
+    private void makeCastling(Position pos_1, Position pos_2) {
+        if (board.getPiece(pos_1).getNameOfPiece().equals(PieceEnum.ROOK)) {
+            Position aux = pos_1;
+            pos_1 = pos_2;
+            pos_2 = aux;
+        }
+        Piece king = board.getPiece(pos_1);
+        Piece rook = board.getPiece(pos_2);
+        if (pos_2.getX() == 0)
+            if (player.equals(ColorEnum.BLACK)) {
+                movements.add(new Movement(pos_2, new Position(2, 0), rook.getWasMoved()));
+                board.movePiece(pos_2, new Position(2, 0));
+                movements.add(new Movement(pos_1, new Position(1, 0), king.getWasMoved()));
+                board.movePiece(pos_1, new Position(1, 0));
+            }
+            else {
+                movements.add(new Movement(pos_2, new Position(3, 7), rook.getWasMoved()));
+                board.movePiece(pos_2, new Position(3, 7));
+                movements.add(new Movement(pos_1, new Position(2, 7), king.getWasMoved()));
+                board.movePiece(pos_1, new Position(2, 7));
+            }
+        else
+            if (player.equals(ColorEnum.BLACK)) {
+                movements.add(new Movement(pos_2, new Position(4, 0), rook.getWasMoved()));
+                board.movePiece(pos_2, new Position(4, 0));
+                movements.add(new Movement(pos_1, new Position(5, 0), king.getWasMoved()));
+                board.movePiece(pos_1, new Position(5, 0));
+            }
+            else {
+                movements.add(new Movement(pos_2, new Position(5, 7), rook.getWasMoved()));
+                board.movePiece(pos_2, new Position(5, 7));
+                movements.add(new Movement(pos_1, new Position(6, 7), king.getWasMoved()));
+                board.movePiece(pos_1, new Position(6, 7));
+            }
     }
 
     /*
@@ -352,7 +372,8 @@ public class Game {
     private boolean couldTakeAPiece(Position pos_1, Position pos_2) {
         if (board.getPiece(pos_2) != null)
             if (!board.getPiece(pos_2).getColorOfPiece().equals(player))
-                return searchPositionInArray(board.getPiece(pos_1).possibleTakes(pos_1), pos_2);
+                if (searchPositionInArray(board.getPiece(pos_1).possibleTakes(pos_1), pos_2))
+                    return isValidMovement(pos_1, pos_2);
         return false;
     }
 
@@ -494,8 +515,8 @@ public class Game {
                 if (board.getPiece(new Position(i, j)) != null)
                     if (board.getPiece(new Position(i, j)).getColorOfPiece().equals(player_aux))
                         positions.add(new Position(i, j));
-        for (Position rival_position : positions) //analizo los movimientos de todas las fichas enemigas recopiladas y debo corroborar si atacan las posiciones pasadas por parametro
-            if (isValidMovement(rival_position, pos))
+        for (Position rival_piece : positions) //analizo los movimientos de todas las fichas enemigas recopiladas y debo corroborar si atacan las posiciones pasadas por parametro
+            if (isValidMovement(rival_piece, pos))
                 return true;
         return false;
     }

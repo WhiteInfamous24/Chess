@@ -33,6 +33,10 @@ public class UserInterfaceWindows implements UserInterface {
     }
 
     public void invalidPositionMessage() {
+        
+    }
+
+    public void invalidMovementMessage() {
 
     }
 

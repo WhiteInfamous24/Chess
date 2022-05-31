@@ -13,6 +13,7 @@ public interface UserInterface {
     public abstract void stillInCheckMessage();
     public abstract void winnerMessage(ColorEnum c);
     public abstract void invalidPositionMessage();
+    public abstract void invalidMovementMessage();
     public abstract void invalidInputMessage();
     public abstract Position requestFirstPositionMessage();
     public abstract Position requestSecondPositionMessage();
