@@ -14,11 +14,6 @@ public class Main {
             game.insertVoidLine(1);
             game.showIfThereIsCheck();
             game.movePiece();
-            game.getUserInterface().cleanScreen();
-            game.showBoard();
-            game.insertVoidLine(1);
-            game.showPiecesTaken();
-            game.insertVoidLine(2);
             game.analizePawnPromotion();
             game.getUserInterface().cleanScreen();
             game.showBoard();

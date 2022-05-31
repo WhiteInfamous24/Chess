@@ -63,7 +63,7 @@ public class Game {
     }
 
     /*
-    inicializa todas las piezas de ajebrez en sus posiciones
+    inicializa todas las piezas de ajedrez en sus posiciones
     */
     public void initializePieces() {
         for (int i = 0; i < 8; i++) {
@@ -200,7 +200,7 @@ public class Game {
     -no se seleccionaron 2 piezas propias que cumplan con los requisitos para realizar el enroque de torre y rey
     -se selecciono una posicion con una pieza enemiga, pero la pieza propia no puede realizar una trayectoria permitida para comerla
     */
-    private Position requestSecondPosition() {
+    private Position requestSecondPosition() throws IndexOutOfBoundsException, InvalidPositionException {
         Position position = user_interface.requestSecondPositionMessage();
         board.getPiece(position); //linea para corroborar que la posicion entra en el tablero o que tire excepcion
         return position;
@@ -504,16 +504,16 @@ public class Game {
     que esa posicion se vea atacada por alguna pieza enemiga
     */
     private boolean itsAttacked(Position pos) {
-        ColorEnum player_aux;
+        ColorEnum opponent;
         ArrayList<Position> positions = new ArrayList<>();
         if (player.equals(ColorEnum.BLACK))
-            player_aux = ColorEnum.WHITE;
+            opponent = ColorEnum.WHITE;
         else
-            player_aux = ColorEnum.BLACK;
+            opponent = ColorEnum.BLACK;
         for (int i = 0; i < 8; i++) //cargo todas las piezas rivales del tablero
             for (int j = 0; j < 8; j++)
                 if (board.getPiece(new Position(i, j)) != null)
-                    if (board.getPiece(new Position(i, j)).getColorOfPiece().equals(player_aux))
+                    if (board.getPiece(new Position(i, j)).getColorOfPiece().equals(opponent))
                         positions.add(new Position(i, j));
         for (Position rival_piece : positions) //analizo los movimientos de todas las fichas enemigas recopiladas y debo corroborar si atacan las posiciones pasadas por parametro
             if (isValidMovement(rival_piece, pos))
