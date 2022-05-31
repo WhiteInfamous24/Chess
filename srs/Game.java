@@ -98,6 +98,10 @@ public class Game {
             player = ColorEnum.WHITE;
     }
 
+    /*
+    es el metodo que se encarga de recopilar lo necesario para realizar el movimiento, validarlo
+    y en caso de cumplir con algun movimiento valido, ejecutarlo
+    */
     public void movePiece() {
         boolean take_piece;
         boolean valid_movement;
@@ -146,6 +150,7 @@ public class Game {
 
     /*
     pide al usuario que ingrese 2 posiciones del tablero, y en caso de no cumplir, se volveran a pedir 2 posiciones nuevamente
+    hasta que se cumplan los requisitos y luego devuelve el movimiento como return el metodo
     */
     private Movement requestMovement() {
         Position position_1 = null;
@@ -202,10 +207,15 @@ public class Game {
     */
     private Position requestSecondPosition() throws IndexOutOfBoundsException, InvalidPositionException {
         Position position = user_interface.requestSecondPositionMessage();
-        board.getPiece(position); //linea para corroborar que la posicion entra en el tablero o que tire excepcion
+        board.getPiece(position); //linea para corroborar que la posicion existe en el tablero o que el metodo tire excepcion
         return position;
     }
 
+    /*
+    se encarga de realizar el enroque de torre y rey entre las posiciones que se pasan por parametro del metodo
+    se da por supuesto que las posiciones pasadas por parametro son una torre y un rey,
+    y que se cumplen todas las condiciones previas para realizar el enroque
+    */
     private void makeCastling(Position pos_1, Position pos_2) {
         if (board.getPiece(pos_1).getNameOfPiece().equals(PieceEnum.ROOK)) {
             Position aux = pos_1;
