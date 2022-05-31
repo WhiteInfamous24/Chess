@@ -24,10 +24,6 @@ public class UserInterfaceWindows implements UserInterface {
         
     }
 
-    public void stillInCheckMessage() {
-
-    }
-
     public void winnerMessage(ColorEnum c) {
         
     }

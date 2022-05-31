@@ -25,10 +25,6 @@ public class UserInterfaceConsole implements UserInterface {
         System.out.println("HAY JAQUE AL REY");
     }
 
-    public void stillInCheckMessage() {
-        System.out.println("AUN HAY JAQUE AL REY");
-    }
-
     public void winnerMessage(ColorEnum c) {
         System.out.println("||======================||");
         System.out.println("|| HAY JAQUEMATE AL REY ||");

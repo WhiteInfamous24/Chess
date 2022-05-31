@@ -133,7 +133,7 @@ public class Game {
                 valid_movement = true;
             }
             if (thereIsCheck()) {
-                user_interface.stillInCheckMessage();
+                user_interface.checkMessage();
                 returnMovementBackwards();
                 valid_movement = false;
             }
