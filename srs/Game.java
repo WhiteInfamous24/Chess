@@ -50,15 +50,9 @@ public class Game {
         System.out.print("Seleccione interfaz grafica deseada: ");
         String input = new Scanner(System.in).nextLine();
         switch (input) {
-            case "1":
-                user_interface = new UserInterfaceConsole();
-                break;
-            case "2":
-                user_interface = new UserInterfaceWindows();
-                break;
-            default:
-                user_interface = new UserInterfaceConsole();
-                break;
+            case "1" -> user_interface = new UserInterfaceConsole();
+            case "2" -> user_interface = new UserInterfaceWindows();
+            default -> user_interface = new UserInterfaceConsole();
         }
     }
 
@@ -112,8 +106,9 @@ public class Game {
             Position position_1 = movement.getPosition1();
             Position position_2 = movement.getPosition2();
             if (board.getPiece(position_2) != null) {
-                if (couldMakeCastling(position_1, position_2)) {
-                    makeCastling(position_1, position_2);
+                String could_make_castling = couldMakeCastling(position_1, position_2);
+                if (could_make_castling != null) {
+                    makeCastling(position_1, position_2, could_make_castling);
                     valid_movement = true;
                 }
                 else if (couldTakeAPiece(position_1, position_2)) {
@@ -216,7 +211,7 @@ public class Game {
     se da por supuesto que las posiciones pasadas por parametro son una torre y un rey,
     y que se cumplen todas las condiciones previas para realizar el enroque
     */
-    private void makeCastling(Position pos_1, Position pos_2) {
+    private void makeCastling(Position pos_1, Position pos_2, String pos) {
         if (board.getPiece(pos_1).getNameOfPiece().equals(PieceEnum.ROOK)) {
             Position aux = pos_1;
             pos_1 = pos_2;
@@ -224,32 +219,32 @@ public class Game {
         }
         Piece king = board.getPiece(pos_1);
         Piece rook = board.getPiece(pos_2);
-        if (pos_2.getX() == 0)
-            if (player.equals(ColorEnum.BLACK)) {
+        switch (pos) {
+            case "UL" -> {
                 movements.add(new Movement(pos_2, new Position(2, 0), rook.getWasMoved()));
                 board.movePiece(pos_2, new Position(2, 0));
                 movements.add(new Movement(pos_1, new Position(1, 0), king.getWasMoved()));
                 board.movePiece(pos_1, new Position(1, 0));
             }
-            else {
+            case "BL" -> {
                 movements.add(new Movement(pos_2, new Position(3, 7), rook.getWasMoved()));
                 board.movePiece(pos_2, new Position(3, 7));
                 movements.add(new Movement(pos_1, new Position(2, 7), king.getWasMoved()));
                 board.movePiece(pos_1, new Position(2, 7));
             }
-        else
-            if (player.equals(ColorEnum.BLACK)) {
+            case "UR" -> {
                 movements.add(new Movement(pos_2, new Position(4, 0), rook.getWasMoved()));
                 board.movePiece(pos_2, new Position(4, 0));
                 movements.add(new Movement(pos_1, new Position(5, 0), king.getWasMoved()));
                 board.movePiece(pos_1, new Position(5, 0));
             }
-            else {
+            case "BR" -> {
                 movements.add(new Movement(pos_2, new Position(5, 7), rook.getWasMoved()));
                 board.movePiece(pos_2, new Position(5, 7));
                 movements.add(new Movement(pos_1, new Position(6, 7), king.getWasMoved()));
                 board.movePiece(pos_1, new Position(6, 7));
             }
+        }
     }
 
     /*
@@ -394,7 +389,8 @@ public class Game {
     -no deben haber piezas entre el rey y la torre,
     el enrroque es moviendo el rey 2 casillas hacia la derecha o izquierda, y la torre, del lado al que se movio, salta sobre el rey
     */
-    private boolean couldMakeCastling(Position pos_1, Position pos_2) {
+    private String couldMakeCastling(Position pos_1, Position pos_2) {
+        String output = null;
         Piece piece_1 = board.getPiece(pos_1);
         Piece piece_2 = board.getPiece(pos_2);
         if (piece_1.getNameOfPiece().equals(PieceEnum.ROOK)) {
@@ -415,27 +411,32 @@ public class Game {
                                 positions.add(new Position(1, 0));
                                 positions.add(new Position(2, 0));
                                 positions.add(new Position(3, 0));
+                                output = "UL";
                             }
                             else {
                                 positions.add(new Position(2, 7));
                                 positions.add(new Position(3, 7));
                                 positions.add(new Position(4, 7));
+                                output = "BL";
                             }
                         else
                             if (player.equals(ColorEnum.BLACK)) {
                                 positions.add(new Position(3, 0));
                                 positions.add(new Position(4, 0));
                                 positions.add(new Position(5, 0));
+                                output = "UR";
                             }
                             else {
                                 positions.add(new Position(4, 7));
                                 positions.add(new Position(5, 7));
                                 positions.add(new Position(6, 7));
+                                output = "BR";
                             }
-                        return !itsAttacked(positions);
+                        if (!itsAttacked(positions));
+                            return output;
                     }
         }
-        return false;
+        return output;
     }
 
     /*
@@ -443,10 +444,12 @@ public class Game {
     */
     private Position searchKing(ColorEnum c) {
         for (int i = 0; i < 8; i++)
-            for (int j = 0; j < 8; j++)
-                if (board.getPiece(new Position(i, j)) != null)
-                    if (board.getPiece(new Position(i, j)).getNameOfPiece().equals(PieceEnum.KING) && board.getPiece(new Position(i, j)).getColorOfPiece().equals(player))
+            for (int j = 0; j < 8; j++) {
+                Piece piece = board.getPiece(new Position(i, j));
+                if (piece != null)
+                    if (piece.getNameOfPiece().equals(PieceEnum.KING) && piece.getColorOfPiece().equals(c))
                         return new Position(i, j);
+            }
         return null;
     }
 

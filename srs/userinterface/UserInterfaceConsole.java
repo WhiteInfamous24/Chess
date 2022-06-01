@@ -66,21 +66,11 @@ public class UserInterfaceConsole implements UserInterface {
         System.out.print("Seleccione una pieza: ");
         String input = new Scanner(System.in).nextLine();
         switch (input) {
-            case "1":
-                piece = new Bishop(c);
-                break;
-            case "2":
-                piece = new Knight(c);
-                break;
-            case "3":
-                piece = new Rook(c);
-                break;
-            case "4":
-                piece = new Queen(c);
-                break;
-            default:
-                piece = new Queen(c);
-                break;
+            case "1" -> piece = new Bishop(c);
+            case "2" -> piece = new Knight(c);
+            case "3" -> piece = new Rook(c);
+            case "4" -> piece = new Queen(c);
+            default -> piece = new Queen(c);
         }
         return piece;
     }
