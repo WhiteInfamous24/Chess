@@ -2,17 +2,17 @@ package srs.util;
 
 import java.util.ArrayList;
 
-public class SearchPositionInArray {
+public class Utilities {
     
-    private static SearchPositionInArray instance;
+    private static Utilities instance;
     
-    private SearchPositionInArray() {
+    private Utilities() {
 
     }
 
-    public static SearchPositionInArray getInstance() {
+    public static Utilities getInstance() {
         if (instance == null)
-            instance = new SearchPositionInArray();
+            instance = new Utilities();
         return instance;
     }
 

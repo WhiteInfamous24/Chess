@@ -12,11 +12,13 @@ public class Movement {
         this.wasMovedOld = wasMovedOld;
     }
 
-    public Position getPosition1() {
+    // GETTERS & SETTERS
+
+    public Position getPositionOne() {
         return positionOne;
     }
 
-    public Position getPosition2() {
+    public Position getPositionTwo() {
         return positionTwo;
     }
 

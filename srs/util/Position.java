@@ -10,6 +10,8 @@ public class Position {
         this.y = y;
     }
 
+    // GETTERS & SETTERS
+
     public int getX() {
         return x;
     }

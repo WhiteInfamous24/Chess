@@ -12,24 +12,26 @@ public class Board {
                 board[i][j] = null;
     }
 
-    public void setPiece(Piece p, Position pos) {
-        board[pos.getX()][pos.getY()] = p;
+    public void movePiece(Position positionOne, Position positionTwo) {
+        board[positionTwo.getX()][positionTwo.getY()] = board[positionOne.getX()][positionOne.getY()];
+        board[positionOne.getX()][positionOne.getY()] = null;
+        if (!board[positionTwo.getX()][positionTwo.getY()].getWasMoved())
+            board[positionTwo.getX()][positionTwo.getY()].setWasMoved(true);
     }
 
-    public Piece getPiece(Position pos) {
-        return board[pos.getX()][pos.getY()];
+    public void undoMovement(Position positionOne, Position positionTwo, boolean wasMovedOld) {
+        board[positionTwo.getX()][positionTwo.getY()] = board[positionOne.getX()][positionOne.getY()];
+        board[positionOne.getX()][positionOne.getY()] = null;
+        board[positionTwo.getX()][positionTwo.getY()].setWasMoved(wasMovedOld);
     }
 
-    public void movePiece(Position pos_1, Position pos_2) {
-        board[pos_2.getX()][pos_2.getY()] = board[pos_1.getX()][pos_1.getY()];
-        board[pos_1.getX()][pos_1.getY()] = null;
-        if (!board[pos_2.getX()][pos_2.getY()].getWasMoved())
-            board[pos_2.getX()][pos_2.getY()].setWasMoved(true);
+    // GETTERS & SETTERS
+
+    public void setPiece(Piece piece, Position position) {
+        board[position.getX()][position.getY()] = piece;
     }
 
-    public void undoMovement(Position pos_1, Position pos_2, boolean b) {
-        board[pos_2.getX()][pos_2.getY()] = board[pos_1.getX()][pos_1.getY()];
-        board[pos_1.getX()][pos_1.getY()] = null;
-        board[pos_2.getX()][pos_2.getY()].setWasMoved(b);
+    public Piece getPiece(Position position) {
+        return board[position.getX()][position.getY()];
     }
 }
