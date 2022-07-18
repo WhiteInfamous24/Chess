@@ -3,16 +3,17 @@ package srs.userinterface;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import srs.Board;
-import srs.Position;
-import srs.enums.ColorEnum;
 import srs.pieces.Bishop;
 import srs.pieces.Knight;
 import srs.pieces.Piece;
 import srs.pieces.Queen;
 import srs.pieces.Rook;
+import srs.util.Board;
+import srs.util.Position;
+import srs.util.enums.ColorEnum;
 
 public class UserInterfaceConsole implements UserInterface {
+    
     public UserInterfaceConsole() {
 
     }

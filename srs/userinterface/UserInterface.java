@@ -2,12 +2,13 @@ package srs.userinterface;
 
 import java.util.ArrayList;
 
-import srs.Board;
-import srs.Position;
-import srs.enums.ColorEnum;
 import srs.pieces.Piece;
+import srs.util.Board;
+import srs.util.Position;
+import srs.util.enums.ColorEnum;
 
 public interface UserInterface {
+    
     public abstract void playerTurnMessage(ColorEnum c);
     public abstract void checkMessage();
     public abstract void winnerMessage(ColorEnum c);

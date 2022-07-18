@@ -3,8 +3,6 @@ package srs;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import srs.enums.ColorEnum;
-import srs.enums.PieceEnum;
 import srs.exception.InvalidPositionException;
 import srs.pieces.Bishop;
 import srs.pieces.King;
@@ -16,31 +14,45 @@ import srs.pieces.Rook;
 import srs.userinterface.UserInterface;
 import srs.userinterface.UserInterfaceConsole;
 import srs.userinterface.UserInterfaceWindows;
+import srs.util.Board;
+import srs.util.Movement;
+import srs.util.Position;
+import srs.util.SearchPositionInArray;
+import srs.util.enums.ColorEnum;
+import srs.util.enums.PieceEnum;
 
 public class Game {
-    private Board board;
-    private ColorEnum player;
-    private ArrayList<Piece> black_pieces_taken;
-    private ArrayList<Piece> white_pieces_taken;
+
+    private static Game instance;
+    private static Board board;
+    private static ColorEnum player;
+    private ArrayList<Piece> blackPiecesTaken;
+    private ArrayList<Piece> whitePiecesTaken;
     private ArrayList<Movement> movements;
-    private UserInterface user_interface;
+    private UserInterface userInterface;
 
     /*
-    constructor de la clase
-    */
-    public Game() {
+     * constructor de la clase
+     */
+    private Game() {
         board = new Board();
         player = ColorEnum.WHITE;
-        black_pieces_taken = new ArrayList<>();
-        white_pieces_taken = new ArrayList<>();
+        blackPiecesTaken = new ArrayList<>();
+        whitePiecesTaken = new ArrayList<>();
         movements = new ArrayList<>();
         askForUserInterface();
     }
 
+    public static Game getInstance() {
+        if (instance == null)
+            instance = new Game();
+        return instance;
+    }
+
     /*
-    pide por consola al usuario que ingrese que metodo de visualizacion quiere ejecutar,
-    luego instancia la "user_interface" en "console" o en "windows"
-    */
+     * pide por consola al usuario que ingrese que metodo de visualizacion quiere ejecutar,
+     * luego instancia la "userInterface" en "console" o en "windows"
+     */
     public void askForUserInterface() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
@@ -50,15 +62,15 @@ public class Game {
         System.out.print("Seleccione interfaz grafica deseada: ");
         String input = new Scanner(System.in).nextLine();
         switch (input) {
-            case "1" -> user_interface = new UserInterfaceConsole();
-            case "2" -> user_interface = new UserInterfaceWindows();
-            default -> user_interface = new UserInterfaceConsole();
+            case "1" -> userInterface = new UserInterfaceConsole();
+            case "2" -> userInterface = new UserInterfaceWindows();
+            default -> userInterface = new UserInterfaceConsole();
         }
     }
 
     /*
-    inicializa todas las piezas de ajedrez en sus posiciones
-    */
+     * inicializa todas las piezas de ajedrez en sus posiciones
+     */
     public void initializePieces() {
         for (int i = 0; i < 8; i++) {
             board.setPiece(new Pawn(ColorEnum.BLACK), new Position(i, 1));
@@ -83,8 +95,8 @@ public class Game {
     }
 
     /*
-    alterna entre jugador de color "white" y "black"
-    */
+     * alterna entre jugador de color "white" y "black"
+     */
     public void changePlayer() {
         if (player.equals(ColorEnum.WHITE))
             player = ColorEnum.BLACK;
@@ -93,9 +105,9 @@ public class Game {
     }
 
     /*
-    es el metodo que se encarga de recopilar lo necesario para realizar el movimiento, validarlo
-    y en caso de cumplir con algun movimiento valido, ejecutarlo
-    */
+     * es el metodo que se encarga de recopilar lo necesario para realizar el movimiento, validarlo
+     * y en caso de cumplir con algun movimiento valido, ejecutarlo
+     */
     public void movePiece() {
         boolean take_piece;
         boolean valid_movement;
@@ -113,9 +125,9 @@ public class Game {
                 }
                 else if (couldTakeAPiece(position_1, position_2)) {
                     if (player.equals(ColorEnum.BLACK))
-                        white_pieces_taken.add(board.getPiece(position_2));
+                        whitePiecesTaken.add(board.getPiece(position_2));
                     else
-                        black_pieces_taken.add(board.getPiece(position_2));
+                        blackPiecesTaken.add(board.getPiece(position_2));
                     movements.add(movement);
                     board.movePiece(position_1, position_2);
                     take_piece = true;
@@ -128,25 +140,25 @@ public class Game {
                 valid_movement = true;
             }
             if (thereIsCheck()) {
-                user_interface.checkMessage();
+                userInterface.checkMessage();
                 returnMovementBackwards();
                 valid_movement = false;
             }
             if (!valid_movement) {
-                user_interface.invalidMovementMessage();
+                userInterface.invalidMovementMessage();
                 if (take_piece)
                     if (player.equals(ColorEnum.BLACK))
-                        white_pieces_taken.remove(white_pieces_taken.size()-1);
+                        whitePiecesTaken.remove(whitePiecesTaken.size()-1);
                     else
-                        black_pieces_taken.remove(black_pieces_taken.size()-1);
+                        blackPiecesTaken.remove(blackPiecesTaken.size()-1);
             }
         } while (!valid_movement);
     }
 
     /*
-    pide al usuario que ingrese 2 posiciones del tablero, y en caso de no cumplir, se volveran a pedir 2 posiciones nuevamente
-    hasta que se cumplan los requisitos y luego devuelve el movimiento como return el metodo
-    */
+     * pide al usuario que ingrese 2 posiciones del tablero, y en caso de no cumplir, se volveran a pedir 2 posiciones nuevamente
+     * hasta que se cumplan los requisitos y luego devuelve el movimiento como return el metodo
+     */
     private Movement requestMovement() {
         Position position_1 = null;
         Position position_2 = null;
@@ -156,18 +168,18 @@ public class Game {
                 position_2 = requestSecondPosition();
             } catch (InvalidPositionException e) {
                 //System.out.println("-InvalidPositionException-");
-                user_interface.invalidPositionMessage();
+                userInterface.invalidPositionMessage();
             } catch (IndexOutOfBoundsException e) {
                 //System.out.println("-IndexOutOfBoundsException-");
-                user_interface.invalidPositionMessage();
+                userInterface.invalidPositionMessage();
             }
         } while (position_1 == null || position_2 == null);
         return new Movement(position_1, position_2, board.getPiece(position_1).getWasMoved());
     }
 
     /*
-    deshace el ultimo movimiento que se ejecuto en la partida
-    */
+     * deshace el ultimo movimiento que se ejecuto en la partida
+     */
     public void returnMovementBackwards() {
         Movement movement = movements.get(movements.size()-1);
         board.undoMovement(movement.getPosition2(), movement.getPosition1(), movement.getWasMovedOld());
@@ -175,14 +187,14 @@ public class Game {
     }
 
     /*
-    pide por interfaz de usuario que se le ingrese una posicion del tablero que indique una pieza propia que sera la pieza a mover
-    puede arrojar excepcion por:
-    -ser una posicion fuera de los limites del tablero
-    -por no haber elegido una pieza propia
-    -haber elegido una casilla vacia
-    */
+     * pide por interfaz de usuario que se le ingrese una posicion del tablero que indique una pieza propia que sera la pieza a mover
+     * puede arrojar excepcion por:
+     * -ser una posicion fuera de los limites del tablero
+     * -por no haber elegido una pieza propia
+     * -haber elegido una casilla vacia
+     */
     private Position requestFirstPosition() throws IndexOutOfBoundsException, InvalidPositionException {
-        Position position = user_interface.requestFirstPositionMessage();
+        Position position = userInterface.requestFirstPositionMessage();
         if (board.getPiece(position) != null) {
             if (!board.getPiece(position).getColorOfPiece().equals(player))
                 throw new InvalidPositionException();
@@ -193,24 +205,24 @@ public class Game {
     }
 
     /*
-    pide por interfaz de usuario que se le ingrese una posicion del tablero que sera la posicion a mover la pieza seleccionada anteriormente
-    o en caso de que sea otra pieza se analiza si es propia para realizar enroque de torre y rey, o si es rival se analiza si se puede comer
-    puede arrojar excepcion por:
-    -elegir una posicion vacia y la pieza seleccionada anteriormente no pueda realizar esa trayectoria
-    -no se seleccionaron 2 piezas propias que cumplan con los requisitos para realizar el enroque de torre y rey
-    -se selecciono una posicion con una pieza enemiga, pero la pieza propia no puede realizar una trayectoria permitida para comerla
-    */
+     * pide por interfaz de usuario que se le ingrese una posicion del tablero que sera la posicion a mover la pieza seleccionada anteriormente
+     * o en caso de que sea otra pieza se analiza si es propia para realizar enroque de torre y rey, o si es rival se analiza si se puede comer
+     * puede arrojar excepcion por:
+     * -elegir una posicion vacia y la pieza seleccionada anteriormente no pueda realizar esa trayectoria
+     * -no se seleccionaron 2 piezas propias que cumplan con los requisitos para realizar el enroque de torre y rey
+     * -se selecciono una posicion con una pieza enemiga, pero la pieza propia no puede realizar una trayectoria permitida para comerla
+     */
     private Position requestSecondPosition() throws IndexOutOfBoundsException, InvalidPositionException {
-        Position position = user_interface.requestSecondPositionMessage();
+        Position position = userInterface.requestSecondPositionMessage();
         board.getPiece(position); //linea para corroborar que la posicion existe en el tablero o que el metodo tire excepcion
         return position;
     }
 
     /*
-    se encarga de realizar el enroque de torre y rey entre las posiciones que se pasan por parametro del metodo
-    se da por supuesto que las posiciones pasadas por parametro son una torre y un rey,
-    y que se cumplen todas las condiciones previas para realizar el enroque
-    */
+     * se encarga de realizar el enroque de torre y rey entre las posiciones que se pasan por parametro del metodo
+     * se da por supuesto que las posiciones pasadas por parametro son una torre y un rey,
+     * y que se cumplen todas las condiciones previas para realizar el enroque
+     */
     private void makeCastling(Position pos_1, Position pos_2, String pos) {
         if (board.getPiece(pos_1).getNameOfPiece().equals(PieceEnum.ROOK)) {
             Position aux = pos_1;
@@ -248,11 +260,11 @@ public class Game {
     }
 
     /*
-    analiza si el movimiento que se desea realizar cumple con los posibles requisitos
-    -en caso de que la posicion final sea valida para tomar una pieza rival, y efectivamente haya una pieza para poder tomar,
-    se procede a verificar que en la trayectoria no haya obstaculos y si cumple, se captura la pieza
-    -en caso de que la posicion final se encuentre vacia, se procede a verificar que no haya obstaculos en el camino
-    */
+     * analiza si el movimiento que se desea realizar cumple con los posibles requisitos
+     * -en caso de que la posicion final sea valida para tomar una pieza rival, y efectivamente haya una pieza para poder tomar,
+     * se procede a verificar que en la trayectoria no haya obstaculos y si cumple, se captura la pieza
+     * -en caso de que la posicion final se encuentre vacia, se procede a verificar que no haya obstaculos en el camino
+     */
     private boolean isValidMovement(Position pos_1, Position pos_2) {
         ArrayList<Position> possible_movements = board.getPiece(pos_1).possibleMovements(pos_1);
         ArrayList<Position> possible_takes = board.getPiece(pos_1).possibleTakes(pos_1);
@@ -265,9 +277,9 @@ public class Game {
     }
 
     /*
-    verifica que, si la ficha realiza una trayectoria larga, no colisione con otras piezas en el trayecto,
-    a excepcion de la posicion final donde puede llegar a haber una pieza cualquiera
-    */
+     * verifica que, si la ficha realiza una trayectoria larga, no colisione con otras piezas en el trayecto,
+     * a excepcion de la posicion final donde puede llegar a haber una pieza cualquiera
+     */
     private boolean analizeTrajectory(Position pos_1, Position pos_2) {
         if (board.getPiece(pos_1).getLongMovement()) { //veo si la pieza realiza movimientos de trayectoria
             boolean no_obstruction = true;
@@ -371,24 +383,24 @@ public class Game {
     }
 
     /*
-    verifica si hay una pieza en la posicion final, donde si esta es igual a la del jugador o es una casilla nula, no habra opcion de comer pieza,
-    y en caso de ser una pieza rival, se analizaran los movimientos predefinidos de cada pieza para ver si puede comer
-    */
+     * verifica si hay una pieza en la posicion final, donde si esta es igual a la del jugador o es una casilla nula, no habra opcion de comer pieza,
+     * y en caso de ser una pieza rival, se analizaran los movimientos predefinidos de cada pieza para ver si puede comer
+     */
     private boolean couldTakeAPiece(Position pos_1, Position pos_2) {
         if (board.getPiece(pos_2) != null)
             if (!board.getPiece(pos_2).getColorOfPiece().equals(player))
-                if (searchPositionInArray(board.getPiece(pos_1).possibleTakes(pos_1), pos_2))
+                if (SearchPositionInArray.getInstance().searchPositionInArray(board.getPiece(pos_1).possibleTakes(pos_1), pos_2))
                     return isValidMovement(pos_1, pos_2);
         return false;
     }
 
     /*
-    -ni el rey ni la torre deben haber sido movidas,
-    -el rey no puede estar en jaque,
-    -ninguna casilla de la trayectoria que recorrera el rey puede estar atacada,
-    -no deben haber piezas entre el rey y la torre,
-    el enrroque es moviendo el rey 2 casillas hacia la derecha o izquierda, y la torre, del lado al que se movio, salta sobre el rey
-    */
+     * -ni el rey ni la torre deben haber sido movidas,
+     * -el rey no puede estar en jaque,
+     * -ninguna casilla de la trayectoria que recorrera el rey puede estar atacada,
+     * -no deben haber piezas entre el rey y la torre,
+     * el enrroque es moviendo el rey 2 casillas hacia la derecha o izquierda, y la torre, del lado al que se movio, salta sobre el rey
+     */
     private String couldMakeCastling(Position pos_1, Position pos_2) {
         String output = null;
         Piece piece_1 = board.getPiece(pos_1);
@@ -440,8 +452,8 @@ public class Game {
     }
 
     /*
-    retorna la posicion del rey del jugador que fue pasado por argumento del metodo
-    */
+     * retorna la posicion del rey del jugador que fue pasado por argumento del metodo
+     */
     private Position searchKing(ColorEnum c) {
         for (int i = 0; i < 8; i++)
             for (int j = 0; j < 8; j++) {
@@ -458,8 +470,8 @@ public class Game {
     }
 
     /*
-    se le pasa una posicion que debe ser la del rey, y retorna un arraylist con las posiciones que no se ven atacadas alrrededor del rey
-    */
+     * se le pasa una posicion que debe ser la del rey, y retorna un arraylist con las posiciones que no se ven atacadas alrrededor del rey
+     */
     private ArrayList<Position> notAttackedPositionsInCheck(Position pos) {
         ArrayList<Position> output = new ArrayList<>();
         ArrayList<Position> around_positions = board.getPiece(pos).possibleMovements(pos);
@@ -470,9 +482,9 @@ public class Game {
     }
 
     /*
-    analiza si el rey se ve acorralado, viendo si en caso de haber jaque, el rey tiene movimientos posibles,
-    incluso en el caso de que pueda llegar a comer una pieza rival
-    */
+     * analiza si el rey se ve acorralado, viendo si en caso de haber jaque, el rey tiene movimientos posibles,
+     * incluso en el caso de que pueda llegar a comer una pieza rival
+     */
     public boolean thereIsCheckmate() {
         if (thereIsCheck()) {
             ArrayList<Position> tentative_movements = notAttackedPositionsInCheck(searchKing(player));
@@ -492,10 +504,10 @@ public class Game {
     }
 
     /*
-    analiza si existen peones que hayan completado todo su recorrido y, en caso de haber,
-    se pide por interfaz de usuario que se elija en que pieza desea que se convierta,
-    para luego ser reemplazada en el tablero
-    */
+     * analiza si existen peones que hayan completado todo su recorrido y, en caso de haber,
+     * se pide por interfaz de usuario que se elija en que pieza desea que se convierta,
+     * para luego ser reemplazada en el tablero
+     */
     public void analizePawnPromotion() {
         Position position = null;
         for (int i = 0; i < 8; i++) {
@@ -509,16 +521,16 @@ public class Game {
                         position = new Position(i, 0);
         }
         if (position != null)
-            board.setPiece(user_interface.requestToChoosePiece(player), position);
+            board.setPiece(userInterface.requestToChoosePiece(player), position);
     }
 
     /*
-    se le pasa una posicion por argumento y devuelve un booleano en el caso de
-    que esa posicion se vea atacada por alguna pieza enemiga
-    */
-    private boolean itsAttacked(Position pos) {
+     * se le pasa una posicion por argumento y devuelve un booleano en el caso de
+     * que esa posicion se vea atacada por alguna pieza enemiga
+     */
+    private boolean itsAttacked(Position position) {
         ColorEnum opponent;
-        ArrayList<Position> positions = new ArrayList<>();
+        ArrayList<Position> opponentPositions = new ArrayList<>();
         if (player.equals(ColorEnum.BLACK))
             opponent = ColorEnum.WHITE;
         else
@@ -527,20 +539,20 @@ public class Game {
             for (int j = 0; j < 8; j++)
                 if (board.getPiece(new Position(i, j)) != null)
                     if (board.getPiece(new Position(i, j)).getColorOfPiece().equals(opponent))
-                        positions.add(new Position(i, j));
-        for (Position rival_piece : positions) //analizo los movimientos de todas las fichas enemigas recopiladas y debo corroborar si atacan las posiciones pasadas por parametro
-            if (isValidMovement(rival_piece, pos))
+                        opponentPositions.add(new Position(i, j));
+        for (Position opponentPositionIterator : opponentPositions) //analizo los movimientos de todas las fichas enemigas recopiladas y debo corroborar si atacan las posiciones pasadas por parametro
+            if (isValidMovement(opponentPositionIterator, position))
                 return true;
         return false;
     }
 
     /*
-    se le pasa un arraylist de posiciones por argumento y devuelve un booleano en el caso de
-    que alguna de esas posiciones se vea atacada po alguna pieza enemiga
-    */
-    private boolean itsAttacked(ArrayList<Position> pos) {
+     * se le pasa un arraylist de posiciones por argumento y devuelve un booleano en el caso de
+     * que alguna de esas posiciones se vea atacada po alguna pieza enemiga
+     */
+    private boolean itsAttacked(ArrayList<Position> positions) {
         ColorEnum opponent;
-        ArrayList<Position> positions = new ArrayList<>();
+        ArrayList<Position> opponentPositions = new ArrayList<>();
         if (player.equals(ColorEnum.BLACK))
             opponent = ColorEnum.WHITE;
         else
@@ -549,54 +561,42 @@ public class Game {
             for (int j = 0; j < 8; j++)
                 if (board.getPiece(new Position(i, j)) != null)
                     if (board.getPiece(new Position(i, j)).getColorOfPiece().equals(opponent))
-                        positions.add(new Position(i, j));
-        for (Position position_to_analize : pos) //analizo los movimientos de todas las fichas enemigas recopiladas y debo corroborar si atacan las posiciones pasadas por parametro
-            for (Position rival_piece : positions)
-                if (isValidMovement(rival_piece, position_to_analize))
+                        opponentPositions.add(new Position(i, j));
+        for (Position positionIterator : positions) //analizo los movimientos de todas las fichas enemigas recopiladas y debo corroborar si atacan las posiciones pasadas por parametro
+            for (Position opponentPositionIterator : opponentPositions)
+                if (isValidMovement(opponentPositionIterator, positionIterator))
                     return true;
         return false;
     }
 
-    /*
-    se le pasa por argumento un arraylist de posiciones y una posicion, y el metodo retornara un booleano
-    en el caso de que exista, o no, alguna posicion en el arraylist con las mismas coordenadas que la posicion
-    que se paso por argumento de la funcion
-    */
-    private boolean searchPositionInArray(ArrayList<Position> array_pos, Position pos) {
-        for (Position position : array_pos)
-            if (position.getX() == pos.getX() && position.getY() == pos.getY())
-                return true;
-        return false;
-    }
-
     public UserInterface getUserInterface() {
-        return user_interface;
+        return userInterface;
     }
 
     public void playerTurnMessage() {
-        user_interface.playerTurnMessage(player);
+        userInterface.playerTurnMessage(player);
     }
 
     public void showIfThereIsCheck() {
         if (thereIsCheck()) {
-            user_interface.checkMessage();
-            user_interface.insertVoidLine(1);
+            userInterface.checkMessage();
+            userInterface.insertVoidLine(1);
         }
     }
 
     public void winnerMessage() {
-        user_interface.winnerMessage(player);
+        userInterface.winnerMessage(player);
     }
 
     public void showBoard() {
-        user_interface.showBoard(board);
+        userInterface.showBoard(board);
     }
 
     public void showPiecesTaken() {
-        user_interface.showPiecesTaken(black_pieces_taken, white_pieces_taken);
+        userInterface.showPiecesTaken(blackPiecesTaken, whitePiecesTaken);
     }
 
     public void insertVoidLine(int n) {
-        user_interface.insertVoidLine(n);
+        userInterface.insertVoidLine(n);
     }
 }

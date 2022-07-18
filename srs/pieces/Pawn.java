@@ -2,34 +2,35 @@ package srs.pieces;
 
 import java.util.ArrayList;
 
-import srs.Position;
-import srs.enums.ColorEnum;
-import srs.enums.PieceEnum;
+import srs.util.Position;
+import srs.util.enums.ColorEnum;
+import srs.util.enums.PieceEnum;
 
 public class Pawn extends Piece {
-    public Pawn(ColorEnum c) {
-        super(PieceEnum.PAWN, c, false);
+
+    public Pawn(ColorEnum color) {
+        super(PieceEnum.PAWN, color, false);
     }
 
-    public ArrayList<Position> possibleMovements(Position pos) {
+    public ArrayList<Position> possibleMovements(Position position) {
         ArrayList<Position> output = new ArrayList<Position>();
-        int x = pos.getX();
-        int y = pos.getY();
+        int x = position.getX();
+        int y = position.getY();
         if (y+1 <= 7 && color == ColorEnum.BLACK)
             output.add(new Position(x, y+1));
         if (y-1 >= 0 && color == ColorEnum.WHITE)
             output.add(new Position(x, y-1));
-        if (y+2 <= 7 && color == ColorEnum.BLACK && !was_moved)
+        if (y+2 <= 7 && color == ColorEnum.BLACK && !wasMoved)
             output.add(new Position(x, y+2));
-        if (y-2 >= 0 && color == ColorEnum.WHITE && !was_moved)
+        if (y-2 >= 0 && color == ColorEnum.WHITE && !wasMoved)
             output.add(new Position(x, y-2));
         return output;
     }
 
-    public ArrayList<Position> possibleTakes(Position pos) {
+    public ArrayList<Position> possibleTakes(Position position) {
         ArrayList<Position> output = new ArrayList<Position>();
-        int x = pos.getX();
-        int y = pos.getY();
+        int x = position.getX();
+        int y = position.getY();
         if (y+1 <= 7 && x+1 <= 7 && color == ColorEnum.BLACK)
             output.add(new Position(x+1, y+1));
         if (y-1 >= 0 && x+1 <= 7 && color == ColorEnum.WHITE)

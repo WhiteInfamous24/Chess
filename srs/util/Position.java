@@ -1,6 +1,7 @@
-package srs;
+package srs.util;
 
 public class Position {
+    
     private int x;
     private int y;
 

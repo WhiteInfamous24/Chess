@@ -1,8 +1,9 @@
-package srs;
+package srs.util;
 
 import srs.pieces.Piece;
 
 public class Board {
+    
     private Piece board[][] = new Piece[8][8];
 
     public Board() {

@@ -2,19 +2,20 @@ package srs.pieces;
 
 import java.util.ArrayList;
 
-import srs.Position;
-import srs.enums.ColorEnum;
-import srs.enums.PieceEnum;
+import srs.util.Position;
+import srs.util.enums.ColorEnum;
+import srs.util.enums.PieceEnum;
 
 public class King extends Piece {
-    public King(ColorEnum c) {
-        super(PieceEnum.KING, c, false);
+
+    public King(ColorEnum color) {
+        super(PieceEnum.KING, color, false);
     }
 
-    public ArrayList<Position> possibleMovements(Position pos) {
+    public ArrayList<Position> possibleMovements(Position position) {
         ArrayList<Position> output = new ArrayList<Position>();
-        int x = pos.getX();
-        int y = pos.getY();
+        int x = position.getX();
+        int y = position.getY();
         if (y+1 <= 7) {
             output.add(new Position(x, y+1));
             if (x+1 <= 7)
@@ -36,10 +37,10 @@ public class King extends Piece {
         return output;
     }
 
-    public ArrayList<Position> possibleTakes(Position pos) {
+    public ArrayList<Position> possibleTakes(Position position) {
         ArrayList<Position> output = new ArrayList<Position>();
-        int x = pos.getX();
-        int y = pos.getY();
+        int x = position.getX();
+        int y = position.getY();
         if (y+1 <= 7) {
             output.add(new Position(x, y+1));
             if (x+1 <= 7)
