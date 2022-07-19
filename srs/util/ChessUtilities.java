@@ -2,8 +2,8 @@ package srs.util;
 
 import java.util.ArrayList;
 
+import srs.Game;
 import srs.pieces.Piece;
-import srs.userinterface.UserInterface;
 import srs.util.enums.ColorEnum;
 import srs.util.enums.PieceEnum;
 
@@ -24,12 +24,12 @@ public class ChessUtilities {
     /*
      * retorna la posicion del rey del jugador que fue pasado por argumento del metodo
      */
-    public Position searchKing(Board board, ColorEnum color) {
+    public static Position searchKing(ColorEnum player) {
         for (int i = 0; i < 8; i++)
             for (int j = 0; j < 8; j++) {
-                Piece piece = board.getPiece(new Position(i, j));
+                Piece piece = Game.getBoard().getPiece(new Position(i, j));
                 if (piece != null)
-                    if (piece.getNameOfPiece().equals(PieceEnum.KING) && piece.getColorOfPiece().equals(color))
+                    if (piece.getNameOfPiece().equals(PieceEnum.KING) && piece.getColorOfPiece().equals(player))
                         return new Position(i, j);
             }
         return null;
@@ -38,18 +38,18 @@ public class ChessUtilities {
     /*
      * retorna un booleano indicando si el rey indicado por parametro se encuentra en jaque
      */
-    public boolean thereIsCheck(Board board, ColorEnum player) {
-        return itsAttacked(board, player, searchKing(board, player));
+    public static boolean isCheck() {
+        return isAttacked(searchKing(Game.getPlayer()));
     }
 
     /*
      * se le pasa una posicion que debe ser la del rey, y retorna un arraylist con las posiciones que no se ven atacadas alrrededor del rey
      */
-    public ArrayList<Position> notAttackedPositionsInCheck(Board board, ColorEnum player, Position position) {
+    public static ArrayList<Position> notAttackedPositionsInCheck(Position position) {
         ArrayList<Position> output = new ArrayList<>();
-        ArrayList<Position> aroundPositions = board.getPiece(position).possibleMovements(position);
+        ArrayList<Position> aroundPositions = Game.getBoard().getPiece(position).possibleMovements(position);
         for (Position positionIterator : aroundPositions)
-            if (!itsAttacked(board, player, positionIterator))
+            if (!isAttacked(positionIterator))
                 output.add(positionIterator);
         return output;
     }
@@ -58,16 +58,16 @@ public class ChessUtilities {
      * analiza si el rey se ve acorralado, viendo si en caso de haber jaque, el rey tiene movimientos posibles,
      * incluso en el caso de que pueda llegar a comer una pieza rival
      */
-    public boolean thereIsCheckmate(Board board, ColorEnum player) {
-        if (thereIsCheck(board, player)) {
-            ArrayList<Position> tentativeMovements = notAttackedPositionsInCheck(board, player, searchKing(board, player));
+    public static boolean isCheckmate() {
+        if (isCheck()) {
+            ArrayList<Position> tentativeMovements = notAttackedPositionsInCheck(searchKing(Game.getPlayer()));
             ArrayList<Position> toRemove = new ArrayList<>();
             for (Position positionIterator : tentativeMovements)
-                if (board.getPiece(positionIterator) != null)
-                    if (board.getPiece(positionIterator).getColorOfPiece().equals(player))
+                if (Game.getBoard().getPiece(positionIterator) != null)
+                    if (Game.getBoard().getPiece(positionIterator).getColorOfPiece().equals(Game.getPlayer()))
                         toRemove.add(positionIterator);
                     else
-                        if (itsAttacked(board, player, positionIterator))
+                        if (isAttacked(positionIterator))
                             toRemove.add(positionIterator);
             tentativeMovements.removeAll(toRemove);
             if (tentativeMovements.size() == 0)
@@ -77,44 +77,35 @@ public class ChessUtilities {
     }
 
     /*
-     * analiza si existen peones que hayan completado todo su recorrido y, en caso de haber,
-     * se pide por interfaz de usuario que se elija en que pieza desea que se convierta,
-     * para luego ser reemplazada en el tablero
+     * busca si existe un peon que haya completado todo su recorrido y retorna la posicion
      */
-    public void analizePawnPromotion(Board board, ColorEnum player, UserInterface userInterface) {
-        Position position = null;
+    public static Position isPawnPromotion() {
         for (int i = 0; i < 8; i++) {
-            if (player.equals(ColorEnum.BLACK))
-                if (board.getPiece(new Position(i, 7)) != null)
-                    if (board.getPiece(new Position(i, 7)).getNameOfPiece().equals(PieceEnum.PAWN))
-                        position = new Position (i, 7);
-            if (player.equals(ColorEnum.WHITE))
-                if (board.getPiece(new Position(i, 0)) != null)
-                    if (board.getPiece(new Position(i, 0)).getNameOfPiece().equals(PieceEnum.PAWN))
-                        position = new Position(i, 0);
+            if (Game.getPlayer().equals(ColorEnum.BLACK))
+                if (Game.getBoard().getPiece(new Position(i, 7)) != null)
+                    if (Game.getBoard().getPiece(new Position(i, 7)).getNameOfPiece().equals(PieceEnum.PAWN))
+                        return  new Position (i, 7);
+            if (Game.getPlayer().equals(ColorEnum.WHITE))
+                if (Game.getBoard().getPiece(new Position(i, 0)) != null)
+                    if (Game.getBoard().getPiece(new Position(i, 0)).getNameOfPiece().equals(PieceEnum.PAWN))
+                        return new Position(i, 0);
         }
-        if (position != null)
-            board.setPiece(userInterface.requestToChoosePiece(player), position);
+        return null;
     }
 
     /*
      * se le pasa una posicion por argumento y devuelve un booleano en el caso de
      * que esa posicion se vea atacada por alguna pieza enemiga
      */
-    public boolean itsAttacked(Board board, ColorEnum player, Position position) {
-        ColorEnum opponent;
+    public static boolean isAttacked(Position position) {
         ArrayList<Position> opponentPositions = new ArrayList<>();
-        if (player.equals(ColorEnum.BLACK))
-            opponent = ColorEnum.WHITE;
-        else
-            opponent = ColorEnum.BLACK;
         for (int i = 0; i < 8; i++) // cargo todas las piezas rivales del tablero
             for (int j = 0; j < 8; j++)
-                if (board.getPiece(new Position(i, j)) != null)
-                    if (board.getPiece(new Position(i, j)).getColorOfPiece().equals(opponent))
+                if (Game.getBoard().getPiece(new Position(i, j)) != null)
+                    if (Game.getBoard().getPiece(new Position(i, j)).getColorOfPiece().equals(Game.getOpponent()))
                         opponentPositions.add(new Position(i, j));
         for (Position opponentPositionIterator : opponentPositions) // analizo los movimientos de todas las fichas enemigas recopiladas y debo corroborar si atacan las posiciones pasadas por parametro
-            if (ValidateMovement.getInstance().isValidMovement(board, opponentPositionIterator, position))
+            if (ValidateMovement.isValidMovement(opponentPositionIterator, position))
                 return true;
         return false;
     }
@@ -123,21 +114,16 @@ public class ChessUtilities {
      * se le pasa un arraylist de posiciones por argumento y devuelve un booleano en el caso de
      * que alguna de esas posiciones se vea atacada po alguna pieza enemiga
      */
-    public boolean itsAttacked(Board board, ColorEnum player, ArrayList<Position> positions) {
-        ColorEnum opponent;
+    public static boolean isAttacked(ArrayList<Position> positions) {
         ArrayList<Position> opponentPositions = new ArrayList<>();
-        if (player.equals(ColorEnum.BLACK))
-            opponent = ColorEnum.WHITE;
-        else
-            opponent = ColorEnum.BLACK;
         for (int i = 0; i < 8; i++) // cargo todas las piezas rivales del tablero
             for (int j = 0; j < 8; j++)
-                if (board.getPiece(new Position(i, j)) != null)
-                    if (board.getPiece(new Position(i, j)).getColorOfPiece().equals(opponent))
+                if (Game.getBoard().getPiece(new Position(i, j)) != null)
+                    if (Game.getBoard().getPiece(new Position(i, j)).getColorOfPiece().equals(Game.getOpponent()))
                         opponentPositions.add(new Position(i, j));
         for (Position positionIterator : positions) // analizo los movimientos de todas las fichas enemigas recopiladas y debo corroborar si atacan las posiciones pasadas por parametro
             for (Position opponentPositionIterator : opponentPositions)
-                if (ValidateMovement.getInstance().isValidMovement(board, opponentPositionIterator, positionIterator))
+                if (ValidateMovement.isValidMovement(opponentPositionIterator, positionIterator))
                     return true;
         return false;
     }

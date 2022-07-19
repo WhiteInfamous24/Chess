@@ -21,7 +21,7 @@ public class Utilities {
      * en el caso de que exista, o no, alguna posicion en el arraylist con las mismas coordenadas que la posicion
      * que se paso por argumento de la funcion
      */
-    public boolean searchPositionInArray(ArrayList<Position> positions, Position position) {
+    public static boolean searchPositionInArray(ArrayList<Position> positions, Position position) {
         for (Position positionIterator : positions)
             if (positionIterator.getX() == position.getX() && positionIterator.getY() == position.getY())
                 return true;

@@ -2,6 +2,7 @@ package srs.userinterface;
 
 import java.util.ArrayList;
 
+import srs.Game;
 import srs.pieces.Bishop;
 import srs.pieces.Knight;
 import srs.pieces.Piece;
@@ -17,7 +18,7 @@ public class UserInterfaceWindows implements UserInterface {
 
     }
     
-    public void playerTurnMessage(ColorEnum c) {
+    public void playerTurnMessage() {
 
     }
 
@@ -25,7 +26,7 @@ public class UserInterfaceWindows implements UserInterface {
         
     }
 
-    public void winnerMessage(ColorEnum c) {
+    public void winnerMessage() {
         
     }
 
@@ -49,15 +50,15 @@ public class UserInterfaceWindows implements UserInterface {
         return new Position(0, 0);
     }
 
-    public Piece requestToChoosePiece(ColorEnum c) {
-        return new Queen(c);
+    public Piece requestToChoosePiece() {
+        return new Queen(Game.getPlayer()); // IMPLEMENT
     }
 
-    public void showBoard(Board b) {
+    public void showBoard() {
 
     }
 
-    public void showPiecesTaken(ArrayList<Piece> b_p_t, ArrayList<Piece> w_p_t) {
+    public void showPiecesTaken() {
 
     }
 

@@ -46,7 +46,7 @@ public class Game {
     /*
      * inicializa todas las piezas de ajedrez en sus posiciones
      */
-    public void initializePieces() {
+    public static void initializePieces() {
         for (int i = 0; i < 8; i++) {
             board.setPiece(new Pawn(ColorEnum.BLACK), new Position(i, 1));
             board.setPiece(new Pawn(ColorEnum.WHITE), new Position(i, 6));
@@ -72,7 +72,7 @@ public class Game {
     /*
      * alterna entre jugador de color "white" y "black"
      */
-    public void changePlayer() {
+    public static void changePlayer() {
         if (player.equals(ColorEnum.WHITE))
             player = ColorEnum.BLACK;
         else
@@ -84,7 +84,7 @@ public class Game {
      * que se pasan por parametro de la funcion, dando por supuesto que se cumplen previamente 
      * las condiciones necesarias para realizar el movimiento
      */
-    public void movePiece(Position positionOne, Position positionTwo, ActionEnum action) {
+    public static void movePiece(Position positionOne, Position positionTwo, ActionEnum action) {
         switch (action) {
             case MOVE -> {
 
@@ -107,7 +107,7 @@ public class Game {
     /*
      * deshace el ultimo movimiento que se ejecuto en la partida
      */
-    public void returnMovementBackwards() {
+    public static void undoLastMove() {
         Movement movement = movements.get(movements.size()-1);
         board.undoMovement(movement.getPositionTwo(), movement.getPositionOne(), movement.getWasMovedOld());
         movements.remove(movements.size()-1);
@@ -118,7 +118,7 @@ public class Game {
      * se da por supuesto que las posiciones pasadas por parametro son una torre y un rey,
      * y que se cumplen todas las condiciones previas para realizar el enroque
      */
-    public void performCastling(Position positionOne, Position positionTwo, CastlingCornerEnum corner) {
+    public static void performCastling(Position positionOne, Position positionTwo, CastlingCornerEnum corner) {
         if (board.getPiece(positionOne).getNameOfPiece().equals(PieceEnum.ROOK)) {
             Position positionAux = positionOne;
             positionOne = positionTwo;
@@ -159,23 +159,29 @@ public class Game {
 
     // GETTERS & SETTERS
 
-    public Board getBoard() {
+    public static Board getBoard() {
         return board;
     }
 
-    public ColorEnum getPlayer() {
+    public static ColorEnum getPlayer() {
         return player;
     }
 
-    public ArrayList<Piece> getBlackPiecesTaken() {
+    public static ColorEnum getOpponent() {
+        if (player.equals(ColorEnum.BLACK))
+            return ColorEnum.WHITE;
+        return ColorEnum.BLACK;
+    }
+
+    public static ArrayList<Piece> getBlackPiecesTaken() {
         return blackPiecesTaken;
     }
 
-    public ArrayList<Piece> getWhitePiecesTaken() {
+    public static ArrayList<Piece> getWhitePiecesTaken() {
         return whitePiecesTaken;
     }
 
-    public ArrayList<Movement> getMovements() {
+    public static ArrayList<Movement> getMovements() {
         return movements;
     }
 }
