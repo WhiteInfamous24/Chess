@@ -12,6 +12,7 @@ import srs.pieces.Rook;
 import srs.util.Board;
 import srs.util.Movement;
 import srs.util.Position;
+import srs.util.ValidateMovement;
 import srs.util.enums.ActionEnum;
 import srs.util.enums.CastlingCornerEnum;
 import srs.util.enums.ColorEnum;
@@ -87,16 +88,39 @@ public class Game {
     public static void movePiece(Position positionOne, Position positionTwo, ActionEnum action) {
         switch (action) {
             case MOVE -> {
-
+                movements.add(new Movement(positionOne, positionTwo, board.getPiece(positionOne).getWasMoved()));
+                board.movePiece(positionOne, positionTwo);
             }
             case PIECE_TAKING -> {
-
+                if (board.getPiece(positionTwo).getColorOfPiece().equals(ColorEnum.BLACK))
+                    blackPiecesTaken.add(board.getPiece(positionTwo));
+                else
+                    whitePiecesTaken.add(board.getPiece(positionTwo));
+                movements.add(new Movement(positionOne, positionTwo, board.getPiece(positionOne).getWasMoved()));
+                board.movePiece(positionOne, positionTwo);
             }
-            case CASTLING -> {
-
+            case CASTLING_UL -> {
+                movements.add(new Movement(positionOne, positionTwo, board.getPiece(positionOne).getWasMoved()));
+                movements.add(new Movement(positionTwo, positionOne, board.getPiece(positionTwo).getWasMoved()));
+                performCastling(positionOne, positionTwo, CastlingCornerEnum.UL);
+            }
+            case CASTLING_BL -> {
+                movements.add(new Movement(positionOne, positionTwo, board.getPiece(positionOne).getWasMoved()));
+                movements.add(new Movement(positionTwo, positionOne, board.getPiece(positionTwo).getWasMoved()));
+                performCastling(positionOne, positionTwo, CastlingCornerEnum.BL);
+            }
+            case CASTLING_UR -> {
+                movements.add(new Movement(positionOne, positionTwo, board.getPiece(positionOne).getWasMoved()));
+                movements.add(new Movement(positionTwo, positionOne, board.getPiece(positionTwo).getWasMoved()));
+                performCastling(positionOne, positionTwo, CastlingCornerEnum.UR);
+            }
+            case CASTLING_BL -> {
+                movements.add(new Movement(positionOne, positionTwo, board.getPiece(positionOne).getWasMoved()));
+                movements.add(new Movement(positionTwo, positionOne, board.getPiece(positionTwo).getWasMoved()));
+                performCastling(positionOne, positionTwo, CastlingCornerEnum.BR);
             }
             case PAWN_PROMOTION -> {
-
+                
             }
             default -> {
                 // VOID
