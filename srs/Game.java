@@ -2,21 +2,14 @@ package srs;
 
 import java.util.ArrayList;
 
-import srs.pieces.Bishop;
-import srs.pieces.King;
-import srs.pieces.Knight;
-import srs.pieces.Pawn;
 import srs.pieces.Piece;
-import srs.pieces.Queen;
-import srs.pieces.Rook;
 import srs.util.Board;
 import srs.util.Movement;
 import srs.util.Position;
-import srs.util.ValidateMovement;
 import srs.util.enums.ActionEnum;
-import srs.util.enums.CastlingCornerEnum;
 import srs.util.enums.ColorEnum;
 import srs.util.enums.PieceEnum;
+import srs.util.factory.impl.PieceFactory;
 
 public class Game {
 
@@ -48,26 +41,14 @@ public class Game {
      * inicializa todas las piezas de ajedrez en sus posiciones
      */
     public static void initializePieces() {
+        String[] blackPieces = { "ROOK_BLACK", "KNIGHT_BLACK", "BISHOP_BLACK", "QUEEN_BLACK", "KING_BLACK", "BISHOP_BLACK", "KNIGHT_BLACK", "ROOK_BLACK" };
+        String[] whitePieces = { "ROOK_WHITE", "KNIGHT_WHITE", "BISHOP_WHITE", "QUEEN_WHITE", "KING_WHITE", "BISHOP_WHITE", "KNIGHT_WHITE", "ROOK_WHITE" };
         for (int i = 0; i < 8; i++) {
-            board.setPiece(new Pawn(ColorEnum.BLACK), new Position(i, 1));
-            board.setPiece(new Pawn(ColorEnum.WHITE), new Position(i, 6));
+            board.setPiece(PieceFactory.getInstance().build("PAWN_BLACK"), new Position(i, 1));
+            board.setPiece(PieceFactory.getInstance().build("PAWN_WHITE"), new Position(i, 6));
+            board.setPiece(PieceFactory.getInstance().build(blackPieces[i]), new Position(i, 0));
+            board.setPiece(PieceFactory.getInstance().build(whitePieces[i]), new Position(i, 7));
         }
-        board.setPiece(new Rook(ColorEnum.BLACK), new Position(0, 0));
-        board.setPiece(new Rook(ColorEnum.BLACK), new Position(7, 0));
-        board.setPiece(new Rook(ColorEnum.WHITE), new Position(0, 7));
-        board.setPiece(new Rook(ColorEnum.WHITE), new Position(7, 7));
-        board.setPiece(new Knight(ColorEnum.BLACK), new Position(1, 0));
-        board.setPiece(new Knight(ColorEnum.BLACK), new Position(6, 0));
-        board.setPiece(new Knight(ColorEnum.WHITE), new Position(1, 7));
-        board.setPiece(new Knight(ColorEnum.WHITE), new Position(6, 7));
-        board.setPiece(new Bishop(ColorEnum.BLACK), new Position(2, 0));
-        board.setPiece(new Bishop(ColorEnum.BLACK), new Position(5, 0));
-        board.setPiece(new Bishop(ColorEnum.WHITE), new Position(2, 7));
-        board.setPiece(new Bishop(ColorEnum.WHITE), new Position(5, 7));
-        board.setPiece(new Queen(ColorEnum.BLACK), new Position(3, 0));
-        board.setPiece(new Queen(ColorEnum.WHITE), new Position(3, 7));
-        board.setPiece(new King(ColorEnum.BLACK), new Position(4, 0));
-        board.setPiece(new King(ColorEnum.WHITE), new Position(4, 7));
     }
 
     /*
@@ -86,55 +67,58 @@ public class Game {
      * las condiciones necesarias para realizar el movimiento
      */
     public static void movePiece(Position positionOne, Position positionTwo, ActionEnum action) {
+        recordMovement(positionOne, positionTwo, action);
         switch (action) {
-            case MOVE -> {
-                movements.add(new Movement(positionOne, positionTwo, board.getPiece(positionOne).getWasMoved()));
-                board.movePiece(positionOne, positionTwo);
-            }
-            case PIECE_TAKING -> {
-                if (board.getPiece(positionTwo).getColorOfPiece().equals(ColorEnum.BLACK))
-                    blackPiecesTaken.add(board.getPiece(positionTwo));
-                else
-                    whitePiecesTaken.add(board.getPiece(positionTwo));
-                movements.add(new Movement(positionOne, positionTwo, board.getPiece(positionOne).getWasMoved()));
-                board.movePiece(positionOne, positionTwo);
-            }
-            case CASTLING_UL -> {
-                movements.add(new Movement(positionOne, positionTwo, board.getPiece(positionOne).getWasMoved()));
-                movements.add(new Movement(positionTwo, positionOne, board.getPiece(positionTwo).getWasMoved()));
-                performCastling(positionOne, positionTwo, CastlingCornerEnum.UL);
-            }
-            case CASTLING_BL -> {
-                movements.add(new Movement(positionOne, positionTwo, board.getPiece(positionOne).getWasMoved()));
-                movements.add(new Movement(positionTwo, positionOne, board.getPiece(positionTwo).getWasMoved()));
-                performCastling(positionOne, positionTwo, CastlingCornerEnum.BL);
-            }
-            case CASTLING_UR -> {
-                movements.add(new Movement(positionOne, positionTwo, board.getPiece(positionOne).getWasMoved()));
-                movements.add(new Movement(positionTwo, positionOne, board.getPiece(positionTwo).getWasMoved()));
-                performCastling(positionOne, positionTwo, CastlingCornerEnum.UR);
-            }
-            case CASTLING_BL -> {
-                movements.add(new Movement(positionOne, positionTwo, board.getPiece(positionOne).getWasMoved()));
-                movements.add(new Movement(positionTwo, positionOne, board.getPiece(positionTwo).getWasMoved()));
-                performCastling(positionOne, positionTwo, CastlingCornerEnum.BR);
-            }
-            case PAWN_PROMOTION -> {
-                
-            }
-            default -> {
-                // VOID
-            }
+            case MOVE -> board.movePiece(positionOne, positionTwo);
+            case PIECE_TAKING -> board.movePiece(positionOne, positionTwo);
+            case CASTLING_UL -> performCastling(positionOne, positionTwo, ActionEnum.CASTLING_UL);
+            case CASTLING_BL -> performCastling(positionOne, positionTwo, ActionEnum.CASTLING_BL);
+            case CASTLING_UR -> performCastling(positionOne, positionTwo, ActionEnum.CASTLING_UR);
+            case CASTLING_BR -> performCastling(positionOne, positionTwo, ActionEnum.CASTLING_BR);
+            default -> { } // VOID
         }
+    }
+
+    public static void pawnPromotion(Piece piece, Position position) {
+        ActionEnum action;
+        switch (piece.getNameOfPiece()) {
+            case QUEEN -> action = ActionEnum.PAWN_PROMOTION_QUEEN;
+            case BISHOP -> action = ActionEnum.PAWN_PROMOTION_BISHOP;
+            case KNIGHT -> action = ActionEnum.PAWN_PROMOTION_KNIGHT;
+            case ROOK -> action = ActionEnum.PAWN_PROMOTION_ROOK;
+            default -> action = null;
+        }
+        recordMovement(position, null, action);
+        board.setPiece(piece, position);
     }
 
     /*
      * deshace el ultimo movimiento que se ejecuto en la partida
      */
     public static void undoLastMove() {
-        Movement movement = movements.get(movements.size()-1);
-        board.undoMovement(movement.getPositionTwo(), movement.getPositionOne(), movement.getWasMovedOld());
-        movements.remove(movements.size()-1);
+        // IMPLEMENT
+    }
+
+    private static void recordMovement(Position positionOne, Position positionTwo, ActionEnum action) {
+        switch (action) {
+            case MOVE -> movements.add(new Movement(positionOne, positionTwo, action));
+            case PIECE_TAKING -> {
+                movements.add(new Movement(positionOne, positionTwo, action));
+                if (board.getPiece(positionOne).getColorOfPiece().equals(ColorEnum.BLACK))
+                    whitePiecesTaken.add(board.getPiece(positionTwo));
+                else
+                    blackPiecesTaken.add(board.getPiece(positionTwo));
+            }
+            case CASTLING_UL -> movements.add(new Movement(new Position(4, 0), new Position(2, 0), action));
+            case CASTLING_BL -> movements.add(new Movement(new Position(4, 7), new Position(2, 7), action));
+            case CASTLING_UR -> movements.add(new Movement(new Position(4, 0), new Position(6, 0), action));
+            case CASTLING_BR -> movements.add(new Movement(new Position(4, 7), new Position(6, 7), action));
+            case PAWN_PROMOTION_QUEEN -> movements.add(new Movement(positionOne, null, action));
+            case PAWN_PROMOTION_BISHOP -> movements.add(new Movement(positionOne, null, action));
+            case PAWN_PROMOTION_KNIGHT -> movements.add(new Movement(positionOne, null, action));
+            case PAWN_PROMOTION_ROOK -> movements.add(new Movement(positionOne, null, action));
+            default -> { } // VOID
+        }
     }
 
     /*
@@ -142,42 +126,30 @@ public class Game {
      * se da por supuesto que las posiciones pasadas por parametro son una torre y un rey,
      * y que se cumplen todas las condiciones previas para realizar el enroque
      */
-    public static void performCastling(Position positionOne, Position positionTwo, CastlingCornerEnum corner) {
+    public static void performCastling(Position positionOne, Position positionTwo, ActionEnum corner) {
         if (board.getPiece(positionOne).getNameOfPiece().equals(PieceEnum.ROOK)) {
             Position positionAux = positionOne;
             positionOne = positionTwo;
             positionTwo = positionAux;
         }
-        Piece king = board.getPiece(positionOne);
-        Piece rook = board.getPiece(positionTwo);
         switch (corner) {
-            case UL -> {
-                movements.add(new Movement(positionTwo, new Position(2, 0), rook.getWasMoved()));
-                board.movePiece(positionTwo, new Position(2, 0));
-                movements.add(new Movement(positionOne, new Position(1, 0), king.getWasMoved()));
-                board.movePiece(positionOne, new Position(1, 0));
+            case CASTLING_UL -> {
+                board.movePiece(positionTwo, new Position(3, 0));
+                board.movePiece(positionOne, new Position(2, 0));
             }
-            case BL -> {
-                movements.add(new Movement(positionTwo, new Position(3, 7), rook.getWasMoved()));
+            case CASTLING_BL -> {
                 board.movePiece(positionTwo, new Position(3, 7));
-                movements.add(new Movement(positionOne, new Position(2, 7), king.getWasMoved()));
                 board.movePiece(positionOne, new Position(2, 7));
             }
-            case UR -> {
-                movements.add(new Movement(positionTwo, new Position(4, 0), rook.getWasMoved()));
-                board.movePiece(positionTwo, new Position(4, 0));
-                movements.add(new Movement(positionOne, new Position(5, 0), king.getWasMoved()));
-                board.movePiece(positionOne, new Position(5, 0));
+            case CASTLING_UR -> {
+                board.movePiece(positionTwo, new Position(5, 0));
+                board.movePiece(positionOne, new Position(6, 0));
             }
-            case BR -> {
-                movements.add(new Movement(positionTwo, new Position(5, 7), rook.getWasMoved()));
+            case CASTLING_BR -> {
                 board.movePiece(positionTwo, new Position(5, 7));
-                movements.add(new Movement(positionOne, new Position(6, 7), king.getWasMoved()));
                 board.movePiece(positionOne, new Position(6, 7));
             }
-            default -> {
-                // VOID
-            }
+            default -> { } // VOID
         }
     }
 

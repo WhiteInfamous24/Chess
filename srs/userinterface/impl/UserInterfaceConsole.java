@@ -1,82 +1,98 @@
-package srs.userinterface;
+package srs.userinterface.impl;
 
 import java.util.ArrayList;
 import java.util.Scanner;
 
 import srs.Game;
-import srs.pieces.Bishop;
-import srs.pieces.Knight;
 import srs.pieces.Piece;
-import srs.pieces.Queen;
-import srs.pieces.Rook;
+import srs.userinterface.UserInterface;
 import srs.util.Board;
 import srs.util.Position;
-import srs.util.enums.ColorEnum;
+import srs.util.factory.impl.PieceFactory;
 
 public class UserInterfaceConsole implements UserInterface {
     
-    public UserInterfaceConsole() {
-
-    }
+    public UserInterfaceConsole() { } // VOID
     
+    @Override
     public void playerTurnMessage() {
         System.out.println("TURNO DE " + Game.getPlayer());
     }
 
+    @Override
     public void checkMessage() {
         System.out.println("HAY JAQUE AL REY");
     }
 
+    @Override
     public void winnerMessage() {
         System.out.println("||===||==========================||===||");
         System.out.println("||   ||   HAY JAQUEMATE AL REY   ||   ||");
-        System.out.println("||   ||      GANADOR: " + Game.getOpponent() + "      ||   ||");
+        System.out.println("||   ||      GANADOR: " + Game.getPlayer() + "      ||   ||");
         System.out.println("||===||==========================||===||");
     }
 
+    @Override
     public void invalidPositionMessage() {
         System.out.println("POSICION NO VALIDA");
     }
 
+    @Override
     public void invalidMovementMessage() {
         System.out.println("MOVIMIENTO NO VALIDO");
     }
 
+    @Override
     public void invalidInputMessage() {
         System.out.println("ENTRADA NO VALIDA");
     }
 
-    public Position requestFirstPositionMessage() {
+    @Override
+    public Position firstPositionRequestMessage() {
         System.out.print("Pieza a mover: ");
         String input = new Scanner(System.in).nextLine();
         return new Position(input.charAt(0)-97, 7-(input.charAt(1)-49));
     }
 
-    public Position requestSecondPositionMessage() {
+    @Override
+    public Position secondPositionRequestMessage() {
         System.out.print("Mover a casilla: ");
         String input = new Scanner(System.in).nextLine();
         return new Position(input.charAt(0)-97, 7-(input.charAt(1)-49));
     }
 
-    public Piece requestToChoosePiece() {
-        Piece piece;
-        System.out.println("'1' ----> Bishop");
-        System.out.println("'2' ----> Knight");
-        System.out.println("'3' ----> Rook");
-        System.out.println("'4' ----> Queen");
-        System.out.println("(default) Queen\n");
-        System.out.print("Seleccione una pieza: ");
+    @Override
+    public final Piece choosePieceRequest() {
+        cleanScreen();
+        showBoard();
+        insertVoidLine(1);
+        showPiecesTaken();
+        insertVoidLine(1);
+        playerTurnMessage();
+        insertVoidLine(1);
+        System.out.println("||===||=========================||===||");
+        System.out.println("||   ||                         ||   ||");
+        System.out.println("||   ||   CORONACION DE PEON:   ||   ||");
+        System.out.println("||   ||                         ||   ||");
+        System.out.println("||   ||   '1' ----> Bishop      ||   ||");
+        System.out.println("||   ||   '2' ----> Knight      ||   ||");
+        System.out.println("||   ||   '3' ----> Rook        ||   ||");
+        System.out.println("||   ||   '4' ----> Queen       ||   ||");
+        System.out.println("||   ||   (default) Queen       ||   ||");
+        System.out.println("||   ||                         ||   ||");
+        System.out.println("||===||=========================||===||");
+        System.out.print("\nSeleccion: ");
         String input = new Scanner(System.in).nextLine();
-        switch (input) {
-            case "1" -> piece = new Bishop(Game.getPlayer());
-            case "2" -> piece = new Knight(Game.getPlayer());
-            case "3" -> piece = new Rook(Game.getPlayer());
-            case "4" -> piece = new Queen(Game.getPlayer());
-            default -> piece = new Queen(Game.getPlayer());
-        }
-        return piece;
+        return switch (input) {
+            case "1" -> PieceFactory.getInstance().build("BISHOP_" + Game.getPlayer().toString());
+            case "2" -> PieceFactory.getInstance().build("KNIGHT_" + Game.getPlayer().toString());
+            case "3" -> PieceFactory.getInstance().build("ROOK_" + Game.getPlayer().toString());
+            case "4" -> PieceFactory.getInstance().build("QUEEN_" + Game.getPlayer().toString());
+            default -> PieceFactory.getInstance().build("QUEEN_" + Game.getPlayer().toString());
+        };
     }
 
+    @Override
     public void showBoard() {
         Board board = Game.getBoard();
         int row = 8;
@@ -114,58 +130,61 @@ public class UserInterfaceConsole implements UserInterface {
         System.out.println("||===||===============================================================================================||===||");
     }
 
+    @Override
     public void showPiecesTaken() {
         ArrayList<Piece> blackPiecesTaken = Game.getBlackPiecesTaken();
         ArrayList<Piece> whitePiecesTaken = Game.getWhitePiecesTaken();
         System.out.print("||====================|");
-        for (Piece piece : blackPiecesTaken)
+        for (Piece pieceIterator : blackPiecesTaken)
             System.out.print("|===========");
         if (blackPiecesTaken.size() == 0)
             System.out.print("|");
         else
             System.out.print("||");
         System.out.print("\n|| BLACK PIECES TAKEN |");
-        for (Piece piece : blackPiecesTaken)
-            System.out.printf("| %-10s", piece.getNameOfPiece());
+        for (Piece pieceIterator : blackPiecesTaken)
+            System.out.printf("| %-10s", pieceIterator.getNameOfPiece());
         if (blackPiecesTaken.size() == 0)
             System.out.print("|");
         else
             System.out.print("||");
         System.out.print("\n||--------------------|");
-        for (Piece piece : blackPiecesTaken)
+        for (Piece pieceIterator : blackPiecesTaken)
             System.out.print("|-----------");
         if (blackPiecesTaken.size() == 0)
             System.out.print("|");
         else
             System.out.print("||");
         System.out.print("\n||--------------------|");
-        for (Piece piece : whitePiecesTaken)
+        for (Piece pieceIterator : whitePiecesTaken)
             System.out.print("|-----------");
         if (whitePiecesTaken.size() == 0)
             System.out.print("|");
         else
             System.out.print("||");
         System.out.print("\n|| WHITE PIECES TAKEN |");
-        for (Piece piece : whitePiecesTaken)
-            System.out.printf("| %-10s", piece.getNameOfPiece());
+        for (Piece pieceIterator : whitePiecesTaken)
+            System.out.printf("| %-10s", pieceIterator.getNameOfPiece());
         if (whitePiecesTaken.size() == 0)
             System.out.print("|");
         else
             System.out.print("||");
         System.out.print("\n||====================|");
-        for (Piece piece : whitePiecesTaken)
+        for (Piece pieceIterator : whitePiecesTaken)
             System.out.print("|===========");
         if (whitePiecesTaken.size() == 0)
-            System.out.print("|");
+            System.out.println("|");
         else
-            System.out.print("||");
+            System.out.println("||");
     }
 
+    @Override
     public void cleanScreen() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
     }
 
+    @Override
     public void insertVoidLine(int n) {
         for(int i = 0; i < n; i++)
             System.out.println("");

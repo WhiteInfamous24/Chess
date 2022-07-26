@@ -6,9 +6,7 @@ public class Utilities {
     
     private static Utilities instance;
     
-    private Utilities() {
-
-    }
+    private Utilities() { } // VOID
 
     public static Utilities getInstance() {
         if (instance == null)

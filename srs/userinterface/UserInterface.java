@@ -11,9 +11,9 @@ public interface UserInterface {
     public abstract void invalidPositionMessage();
     public abstract void invalidMovementMessage();
     public abstract void invalidInputMessage();
-    public abstract Position requestFirstPositionMessage();
-    public abstract Position requestSecondPositionMessage();
-    public abstract Piece requestToChoosePiece();
+    public abstract Position firstPositionRequestMessage();
+    public abstract Position secondPositionRequestMessage();
+    public abstract Piece choosePieceRequest();
     public abstract void showBoard();
     public abstract void showPiecesTaken();
     public abstract void cleanScreen();

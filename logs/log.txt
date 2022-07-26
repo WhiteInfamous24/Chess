@@ -1,0 +1,39 @@
+--- PROGRAM START-UP --- 
+INITIAL USER INTERFACE: UserInterfaceConsole
+--- PROGRAM START-UP --- 
+INITIAL USER INTERFACE: UserInterfaceConsole
+WHITE |                  MOVE | KNIGHT | [1][7] -> [0][5]
+BLACK |                  MOVE | KNIGHT | [1][0] -> [0][2]
+WHITE |                  MOVE | KNIGHT | [0][5] -> [1][3]
+BLACK |                  MOVE | KNIGHT | [0][2] -> [1][4]
+WHITE |          PIECE_TAKING | KNIGHT | [1][3] -> [0][1]
+BLACK |          PIECE_TAKING | KNIGHT | [1][4] -> [0][6]
+--- PROGRAM START-UP --- 
+INITIAL USER INTERFACE: UserInterfaceConsole
+--- PROGRAM START-UP --- 
+INITIAL USER INTERFACE: UserInterfaceConsole
+WHITE |                  MOVE |   PAWN | [0][6] -> [0][4]
+BLACK |                  MOVE | KNIGHT | [1][0] -> [2][2]
+WHITE |                  MOVE |   PAWN | [0][4] -> [0][3]
+BLACK |                  MOVE | KNIGHT | [2][2] -> [1][4]
+WHITE |                  MOVE |   PAWN | [0][3] -> [0][2]
+BLACK |          PIECE_TAKING | KNIGHT | [1][4] -> [2][6]
+--- PROGRAM START-UP --- 
+INITIAL USER INTERFACE: UserInterfaceConsole
+--- PROGRAM START-UP --- 
+INITIAL USER INTERFACE: UserInterfaceWindows
+--- PROGRAM START-UP --- 
+INITIAL USER INTERFACE: UserInterfaceConsole
+WHITE |                  MOVE |   PAWN | [1][6] -> [1][4]
+BLACK |                  MOVE |   PAWN | [6][1] -> [6][3]
+WHITE |                  MOVE |   PAWN | [1][4] -> [1][3]
+BLACK |                  MOVE |   PAWN | [6][3] -> [6][4]
+WHITE |                  MOVE |   PAWN | [1][3] -> [1][2]
+BLACK |                  MOVE |   PAWN | [6][4] -> [6][5]
+WHITE |          PIECE_TAKING |   PAWN | [1][2] -> [2][1]
+BLACK |          PIECE_TAKING |   PAWN | [6][5] -> [7][6]
+WHITE |          PIECE_TAKING |   PAWN | [2][1] -> [1][0]
+WHITE |  PAWN_PROMOTION_QUEEN |   PAWN | [1][0]
+BLACK |          PIECE_TAKING |   PAWN | [7][6] -> [6][7]
+BLACK | PAWN_PROMOTION_BISHOP |   PAWN | [6][7]
+WHITE |          PIECE_TAKING |  QUEEN | [1][0] -> [2][0]

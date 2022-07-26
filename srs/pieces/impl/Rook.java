@@ -1,7 +1,8 @@
-package srs.pieces;
+package srs.pieces.impl;
 
 import java.util.ArrayList;
 
+import srs.pieces.Piece;
 import srs.util.Position;
 import srs.util.enums.ColorEnum;
 import srs.util.enums.PieceEnum;
