@@ -19,12 +19,6 @@ public class Board {
             board[positionTwo.getX()][positionTwo.getY()].setWasMoved(true);
     }
 
-    public void undoMovement(Position positionOne, Position positionTwo, boolean wasMovedOld) {
-        board[positionTwo.getX()][positionTwo.getY()] = board[positionOne.getX()][positionOne.getY()];
-        board[positionOne.getX()][positionOne.getY()] = null;
-        board[positionTwo.getX()][positionTwo.getY()].setWasMoved(wasMovedOld);
-    }
-
     // GETTERS & SETTERS
 
     public void setPiece(Piece piece, Position position) {

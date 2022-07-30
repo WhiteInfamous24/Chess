@@ -1,18 +1,29 @@
 package srs.userinterface.impl;
 
-import java.util.ArrayList;
-
-import srs.Game;
 import srs.pieces.Piece;
 import srs.userinterface.UserInterface;
-import srs.util.Board;
 import srs.util.Position;
-import srs.util.factory.impl.PieceFactory;
+import srs.util.enums.InputRequestEnum;
 
 public class UserInterfaceWindows implements UserInterface {
     
-    public UserInterfaceWindows() { }
+    private static String userInterfaceType;
+
+    public UserInterfaceWindows() {
+        userInterfaceType = "WINDOWS";
+    }
     
+    @Override
+    public InputRequestEnum inputRequest() {
+        return null; // IMPLEMENT
+    }
+
+    @Override
+    public void mainMenu() { }
+
+    @Override
+    public void userInterfaceSelectionMenu() { }
+
     @Override
     public void playerTurnMessage() { }
 
@@ -33,12 +44,12 @@ public class UserInterfaceWindows implements UserInterface {
 
     @Override
     public Position firstPositionRequestMessage() {
-        return new Position(0, 0);
+        return null; // IMPLEMENT
     }
 
     @Override
     public Position secondPositionRequestMessage() {
-        return new Position(0, 0);
+        return null; // IMPLEMENT
     }
 
     @Override
@@ -57,4 +68,11 @@ public class UserInterfaceWindows implements UserInterface {
 
     @Override
     public void insertVoidLine(int n) { }
+
+    // GETTERS & SETTERS
+
+    @Override
+    public String getUserInterfaceType() {
+        return userInterfaceType;
+    }
 }

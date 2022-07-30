@@ -96,7 +96,51 @@ public class Game {
      * deshace el ultimo movimiento que se ejecuto en la partida
      */
     public static void undoLastMove() {
-        // IMPLEMENT
+        Movement lastMovement = movements.get(movements.size()-1);
+        boolean isPawnPromotion = false;
+        switch (lastMovement.getAction()) {
+            case MOVE -> board.setPiece(lastMovement.getPiece(), lastMovement.getPositionOne());
+            case PIECE_TAKING -> {
+                board.setPiece(lastMovement.getPiece(), lastMovement.getPositionOne());
+                board.setPiece(lastMovement.getPieceAux(), lastMovement.getPositionTwo());
+            }
+            case CASTLING_UL -> {
+                board.setPiece(lastMovement.getPiece(), new Position(4, 0));
+                board.setPiece(lastMovement.getPieceAux(), new Position(0, 0));
+            }
+            case CASTLING_BL -> {
+                board.setPiece(lastMovement.getPiece(), new Position(4, 7));
+                board.setPiece(lastMovement.getPieceAux(), new Position(0, 7));
+            }
+            case CASTLING_UR -> {
+                board.setPiece(lastMovement.getPiece(), new Position(4, 0));
+                board.setPiece(lastMovement.getPieceAux(), new Position(7, 0));
+            }
+            case CASTLING_BR -> {
+                board.setPiece(lastMovement.getPiece(), new Position(4, 7));
+                board.setPiece(lastMovement.getPieceAux(), new Position(7, 7));
+            }
+            case PAWN_PROMOTION_QUEEN -> {
+                board.setPiece(lastMovement.getPiece(), lastMovement.getPositionOne());
+                isPawnPromotion = true;
+            }
+            case PAWN_PROMOTION_BISHOP -> {
+                board.setPiece(lastMovement.getPiece(), lastMovement.getPositionOne());
+                isPawnPromotion = true;
+            }
+            case PAWN_PROMOTION_KNIGHT -> {
+                board.setPiece(lastMovement.getPiece(), lastMovement.getPositionOne());
+                isPawnPromotion = true;
+            }
+            case PAWN_PROMOTION_ROOK -> {
+                board.setPiece(lastMovement.getPiece(), lastMovement.getPositionOne());
+                isPawnPromotion = true;
+            }
+            default -> { } // VOID
+        }
+        movements.remove(movements.size()-1);
+        if (isPawnPromotion)
+            undoLastMove();
     }
 
     private static void recordMovement(Position positionOne, Position positionTwo, ActionEnum action) {

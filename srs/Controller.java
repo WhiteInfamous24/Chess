@@ -1,13 +1,12 @@
 package srs;
 
-import java.util.Scanner;
-
 import srs.exception.InvalidPositionException;
 import srs.userinterface.UserInterface;
 import srs.util.ChessUtilities;
 import srs.util.Movement;
 import srs.util.Position;
 import srs.util.enums.ActionEnum;
+import srs.util.enums.InputRequestEnum;
 import srs.util.factory.impl.UserInterfaceFactory;
 
 public class Controller {
@@ -16,10 +15,11 @@ public class Controller {
     private static UserInterface userInterface;
 
     private Controller() {
-        DataLogger.logProgramStartUp_CONTROLLER();; // DATALOG
-        askForUserInterface();
+        DataLogger.logProgramStartUp_CONTROLLER(); // DATALOG
         Game.getInstance();
         Game.initializePieces();
+        userInterface = UserInterfaceFactory.getInstance().build("CONSOLE");
+        DataLogger.logUserInterface_CONTROLLER(); // DATALOG
     }
 
     public static Controller getInstance() {
@@ -28,63 +28,55 @@ public class Controller {
         return instance;
     }
 
-    /*
-     * pide por consola al usuario que ingrese que metodo de visualizacion quiere ejecutar,
-     * luego instancia la "userInterface" en "console" o en "windows"
-     */
-    private static void askForUserInterface() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
-        System.out.println("||===||=======================||===||");
-        System.out.println("||   ||                       ||   ||");
-        System.out.println("||   ||   INTERFAZ GRAFICA:   ||   ||");
-        System.out.println("||   ||                       ||   ||");
-        System.out.println("||   ||   '1' ----> Consola   ||   ||");
-        System.out.println("||   ||   '2' ----> Ventana   ||   ||");
-        System.out.println("||   ||   (default) Consola   ||   ||");
-        System.out.println("||   ||                       ||   ||");
-        System.out.println("||===||=======================||===||");
-        System.out.print("\nSeleccion: ");
-        String input = new Scanner(System.in).nextLine();
-        switch (input) {
-            case "1" -> userInterface = UserInterfaceFactory.getInstance().build("CONSOLE");
-            case "2" -> userInterface = UserInterfaceFactory.getInstance().build("WINDOWS");
-            default -> userInterface = UserInterfaceFactory.getInstance().build("");
+    public static void inputRequest() {
+        switch (userInterface.inputRequest()) {
+            case PLAY -> {
+                DataLogger.logInputRequest_CONTROLLER(InputRequestEnum.PLAY); // DATALOG
+                movePiece();
+            }
+            case ENTER_MENU -> {
+                DataLogger.logInputRequest_CONTROLLER(InputRequestEnum.ENTER_MENU); // DATALOG
+                userInterface.mainMenu();
+            }
+            default -> {
+                DataLogger.logInputRequest_CONTROLLER(InputRequestEnum.PLAY); // DATALOG
+                movePiece();
+            }
         }
-        DataLogger.logUserInterface_CONTROLLER(); // DATALOG
     }
 
     /*
      * es el metodo que se encarga de recopilar lo necesario para realizar el movimiento, validarlo
      * y en caso de cumplir con un movimiento valido, ejecutarlo
      */
-    public static void movePiece() {
+    private static void movePiece() {
         ActionEnum action;
         Movement movement;
         do {
             action = null;
             movement = movementRequest();
-            if (Game.getBoard().getPiece(movement.getPositionTwo()) != null) {
-                action = ChessUtilities.couldCastling(movement.getPositionOne(), movement.getPositionTwo());
-                if (action == null && ChessUtilities.couldTakeAPiece(movement.getPositionOne(), movement.getPositionTwo()))
+            if (Game.getBoard().getPiece(movement.getPositionTwo()) != null)
+                if (ChessUtilities.couldTakeAPiece(movement.getPositionOne(), movement.getPositionTwo()))
                     action = ActionEnum.PIECE_TAKING;
-            }
+                else
+                    action = ChessUtilities.couldCastling(movement.getPositionOne(), movement.getPositionTwo());
             else if (ChessUtilities.isValidMovement(movement.getPositionOne(), movement.getPositionTwo()))
                 action = ActionEnum.MOVE;
-            if (action != null) // si es valido realiza el movimiento solicitado
+            if (action != null) { // si es valido realiza el movimiento solicitado
                 Game.movePiece(movement.getPositionOne(), movement.getPositionTwo(), action);
-            if (ChessUtilities.isCheck()) { // si se pone al propio rey en jaque se elimina el movimiento
-                userInterface.checkMessage();
-                Game.undoLastMove();
-                action = null;
+                if (ChessUtilities.isCheck()) { // si se pone al propio rey en jaque se elimina el movimiento
+                    userInterface.checkMessage();
+                    Game.undoLastMove();
+                    action = null;
+                }
             }
             if (action == null)
                 userInterface.invalidMovementMessage();
         } while (action == null);
-        DataLogger.logMovement_GAME(); // DATALOG
+        DataLogger.logMovement_CONTROLLER(); // DATALOG
         if (ChessUtilities.isPawnPromotion()) {
             Game.pawnPromotion(userInterface.choosePieceRequest(), movement.getPositionTwo());
-            DataLogger.logPawnPromotion_GAME(); // DATALOG
+            DataLogger.logPawnPromotion_CONTROLLER(); // DATALOG
         }
     }
 
@@ -143,5 +135,10 @@ public class Controller {
 
     public static UserInterface getUserInterface() {
         return userInterface;
+    }
+
+    public static void setUserInterface(UserInterface userInterface) {
+        Controller.userInterface = userInterface;
+        DataLogger.logUserInterface_CONTROLLER(); // DATALOG
     }
 }

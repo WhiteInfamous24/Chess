@@ -3,17 +3,65 @@ package srs.userinterface.impl;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import srs.Controller;
 import srs.Game;
 import srs.pieces.Piece;
 import srs.userinterface.UserInterface;
 import srs.util.Board;
 import srs.util.Position;
+import srs.util.enums.InputRequestEnum;
 import srs.util.factory.impl.PieceFactory;
+import srs.util.factory.impl.UserInterfaceFactory;
 
 public class UserInterfaceConsole implements UserInterface {
+
+    private static String userInterfaceType;
     
-    public UserInterfaceConsole() { } // VOID
+    public UserInterfaceConsole() {
+        userInterfaceType = "CONSOLE";
+    }
     
+    @Override
+    public InputRequestEnum inputRequest() {
+        System.out.println("'play' ----> Jugar turno");
+        System.out.println("'menu' ----> Menu");
+        System.out.println("(default) Jugar turno");
+        System.out.print("\nSeleccion: ");
+        String input = new Scanner(System.in).nextLine();
+        System.out.println("");
+        switch (input) {
+            case "play": return InputRequestEnum.PLAY;
+            case "menu": return InputRequestEnum.ENTER_MENU;
+            default: return InputRequestEnum.PLAY;
+        }
+    }
+
+    @Override
+    public void mainMenu() {
+        System.out.println();
+    }
+
+    @Override
+    public void userInterfaceSelectionMenu() {
+        System.out.println("||===||=========================||===||");
+        System.out.println("||   ||                         ||   ||");
+        System.out.println("||   ||    INTERFAZ GRAFICA:    ||   ||");
+        System.out.println("||   ||                         ||   ||");
+        System.out.println("||   ||    '1' ----> Consola    ||   ||");
+        System.out.println("||   ||    '2' ----> Ventana    ||   ||");
+        System.out.println("||   ||                         ||   ||");
+        System.out.println("||   ||    (default) Consola    ||   ||");
+        System.out.println("||   ||                         ||   ||");
+        System.out.println("||===||=========================||===||");
+        System.out.print("\nSeleccion: ");
+        String input = new Scanner(System.in).nextLine();
+        switch (input) {
+            case "1" -> Controller.setUserInterface(UserInterfaceFactory.getInstance().build("CONSOLE"));
+            case "2" -> Controller.setUserInterface(UserInterfaceFactory.getInstance().build("WINDOWS"));
+            default -> Controller.setUserInterface(UserInterfaceFactory.getInstance().build("CONSOLE"));
+        }
+    }
+
     @Override
     public void playerTurnMessage() {
         System.out.println("TURNO DE " + Game.getPlayer());
@@ -26,10 +74,12 @@ public class UserInterfaceConsole implements UserInterface {
 
     @Override
     public void winnerMessage() {
-        System.out.println("||===||==========================||===||");
-        System.out.println("||   ||   HAY JAQUEMATE AL REY   ||   ||");
-        System.out.println("||   ||      GANADOR: " + Game.getPlayer() + "      ||   ||");
-        System.out.println("||===||==========================||===||");
+        System.out.println("||===||============================||===||");
+        System.out.println("||   ||                            ||   ||");
+        System.out.println("||   ||    HAY JAQUEMATE AL REY    ||   ||");
+        System.out.println("||   ||       GANADOR: " + Game.getPlayer() + "       ||   ||");
+        System.out.println("||   ||                            ||   ||");
+        System.out.println("||===||============================||===||");
     }
 
     @Override
@@ -70,17 +120,18 @@ public class UserInterfaceConsole implements UserInterface {
         insertVoidLine(1);
         playerTurnMessage();
         insertVoidLine(1);
-        System.out.println("||===||=========================||===||");
-        System.out.println("||   ||                         ||   ||");
-        System.out.println("||   ||   CORONACION DE PEON:   ||   ||");
-        System.out.println("||   ||                         ||   ||");
-        System.out.println("||   ||   '1' ----> Bishop      ||   ||");
-        System.out.println("||   ||   '2' ----> Knight      ||   ||");
-        System.out.println("||   ||   '3' ----> Rook        ||   ||");
-        System.out.println("||   ||   '4' ----> Queen       ||   ||");
-        System.out.println("||   ||   (default) Queen       ||   ||");
-        System.out.println("||   ||                         ||   ||");
-        System.out.println("||===||=========================||===||");
+        System.out.println("||===||===========================||===||");
+        System.out.println("||   ||                           ||   ||");
+        System.out.println("||   ||    CORONACION DE PEON:    ||   ||");
+        System.out.println("||   ||                           ||   ||");
+        System.out.println("||   ||    '1' ----> Bishop       ||   ||");
+        System.out.println("||   ||    '2' ----> Knight       ||   ||");
+        System.out.println("||   ||    '3' ----> Rook         ||   ||");
+        System.out.println("||   ||    '4' ----> Queen        ||   ||");
+        System.out.println("||   ||                           ||   ||");
+        System.out.println("||   ||    (default) Queen        ||   ||");
+        System.out.println("||   ||                           ||   ||");
+        System.out.println("||===||===========================||===||");
         System.out.print("\nSeleccion: ");
         String input = new Scanner(System.in).nextLine();
         return switch (input) {
@@ -134,44 +185,16 @@ public class UserInterfaceConsole implements UserInterface {
     public void showPiecesTaken() {
         ArrayList<Piece> blackPiecesTaken = Game.getBlackPiecesTaken();
         ArrayList<Piece> whitePiecesTaken = Game.getWhitePiecesTaken();
-        System.out.print("||====================|");
-        for (Piece pieceIterator : blackPiecesTaken)
-            System.out.print("|===========");
-        if (blackPiecesTaken.size() == 0)
-            System.out.print("|");
-        else
-            System.out.print("||");
-        System.out.print("\n|| BLACK PIECES TAKEN |");
+        System.out.print("|| BLACK PIECES TAKEN |");
         for (Piece pieceIterator : blackPiecesTaken)
             System.out.printf("| %-10s", pieceIterator.getNameOfPiece());
         if (blackPiecesTaken.size() == 0)
-            System.out.print("|");
+            System.out.println("|");
         else
-            System.out.print("||");
-        System.out.print("\n||--------------------|");
-        for (Piece pieceIterator : blackPiecesTaken)
-            System.out.print("|-----------");
-        if (blackPiecesTaken.size() == 0)
-            System.out.print("|");
-        else
-            System.out.print("||");
-        System.out.print("\n||--------------------|");
-        for (Piece pieceIterator : whitePiecesTaken)
-            System.out.print("|-----------");
-        if (whitePiecesTaken.size() == 0)
-            System.out.print("|");
-        else
-            System.out.print("||");
+            System.out.println("||");
         System.out.print("\n|| WHITE PIECES TAKEN |");
         for (Piece pieceIterator : whitePiecesTaken)
             System.out.printf("| %-10s", pieceIterator.getNameOfPiece());
-        if (whitePiecesTaken.size() == 0)
-            System.out.print("|");
-        else
-            System.out.print("||");
-        System.out.print("\n||====================|");
-        for (Piece pieceIterator : whitePiecesTaken)
-            System.out.print("|===========");
         if (whitePiecesTaken.size() == 0)
             System.out.println("|");
         else
@@ -188,5 +211,12 @@ public class UserInterfaceConsole implements UserInterface {
     public void insertVoidLine(int n) {
         for(int i = 0; i < n; i++)
             System.out.println("");
+    }
+
+    // GETTERS & SETTERS
+
+    @Override
+    public String getUserInterfaceType() {
+        return userInterfaceType;
     }
 }

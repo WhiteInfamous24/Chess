@@ -15,7 +15,7 @@ public class Main {
             Controller.getUserInterface().insertVoidLine(1);
             Controller.getUserInterface().playerTurnMessage();
             Controller.getUserInterface().insertVoidLine(1);
-            Controller.movePiece();
+            Controller.inputRequest();
             Game.changePlayer();
         } while (!ChessUtilities.isCheckmate());
         Game.changePlayer();
