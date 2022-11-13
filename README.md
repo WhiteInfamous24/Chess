@@ -1,1 +1,1 @@
-# Chess-v1.0
+# Chess
